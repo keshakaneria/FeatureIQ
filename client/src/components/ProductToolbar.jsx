@@ -37,7 +37,7 @@ export function ProductToolbar({
             <button
               type="button"
               onClick={handleCreateProduct}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 active:scale-95 shadow-sm"
+              className="inline-flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-6 py-3.5 text-sm font-bold text-violet-700 transition-all hover:bg-violet-100 active:scale-95 shadow-sm"
             >
               <Plus className="h-4 w-4" />
               New Product
@@ -49,7 +49,7 @@ export function ProductToolbar({
           <button
             type="button"
             onClick={onPrint}
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 shadow-sm"
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-6 py-3.5 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 shadow-lg shadow-violet-200"
           >
             <Printer className="h-4 w-4" />
             Generate PDF Report

@@ -39,7 +39,7 @@ function SortHeader({ column, sorting, onChange }) {
       type="button"
       onClick={() => onChange(column.key)}
       title={column.label}
-      className="group flex items-center gap-1.5 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400 transition-colors hover:text-slate-800 min-w-0"
+      className="group flex items-center gap-1.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 transition-colors hover:text-violet-600 min-w-0"
     >
       <span className="truncate">{column.label}</span>
       <div className={`flex-shrink-0 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}>
@@ -103,7 +103,7 @@ function CommentComposer({ featureId, onAddComment }) {
           whileTap={{ scale: 0.98 }}
           type="submit"
           disabled={isSubmitting}
-          className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 disabled:opacity-50 shadow-sm"
+          className="rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-50 shadow-lg shadow-violet-200"
         >
           Post
         </motion.button>
@@ -147,8 +147,8 @@ function FeatureDetailPanel({ feature, onAddComment, onDeleteComment }) {
 
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1">
-            <MessageSquare className="h-4 w-4 text-slate-400" />
-            <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-700">Discussion History</h4>
+            <MessageSquare className="h-4 w-4 text-violet-500" />
+            <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-violet-700">Discussion History</h4>
           </div>
           <CommentComposer featureId={feature.id} onAddComment={onAddComment} />
           <div className="grid gap-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
@@ -213,7 +213,7 @@ function SectionTable({
     <section className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       <div className="flex items-center justify-between p-6 border-b border-slate-100">
         <div>
-          <h3 className="text-xl font-bold text-slate-900 tracking-tight">{title}</h3>
+          <h3 className="text-xl font-extrabold bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent tracking-tight">{title}</h3>
           <p className="mt-1 text-sm font-medium text-slate-500">{subtitle}</p>
         </div>
 
@@ -221,7 +221,7 @@ function SectionTable({
           <button
             type="button"
             onClick={onToggleCollapsed}
-            className="group flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 transition-all hover:bg-slate-50 hover:text-slate-900 active:scale-95"
+            className="group flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 transition-all hover:bg-violet-50 hover:text-violet-600 hover:border-violet-200 active:scale-95"
           >
             <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${collapsed ? "" : "rotate-180"}`} />
           </button>
@@ -274,7 +274,7 @@ function SectionTable({
                       </div>
                     </Cell>
                     <Cell>
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white font-bold text-[11px]">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white font-bold text-[11px] shadow-sm">
                         {feature.roiScore.toFixed(1)}
                       </div>
                     </Cell>
@@ -335,7 +335,7 @@ function SectionTable({
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={(e) => { e.stopPropagation(); onEditFeature(feature); }}
-                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-800 hover:border-slate-300 transition-all shadow-sm"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-violet-600 hover:border-violet-200 transition-all shadow-sm"
                       title="Edit feature"
                     >
                       <ArrowUpRight className="h-4 w-4" />

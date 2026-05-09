@@ -128,13 +128,13 @@ export function FeatureForm({ selectedProductName, editingFeature, onSave, onCan
         <form className="grid gap-8" onSubmit={handleSubmit}>
           <div className="flex justify-between items-start">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-slate-600">
+              <div className="inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-violet-600">
                 Data Entry
               </div>
-              <h2 className="mt-4 text-2xl font-bold text-slate-900">
+              <h2 className="mt-4 text-3xl font-extrabold text-slate-900">
                 {editingFeature ? "Modify existing feature" : `Strategic Input for ${selectedProductName}`}
               </h2>
-              <p className="mt-2 text-slate-500 text-sm">
+              <p className="mt-2 text-slate-500 text-sm font-medium">
                 Fill in the operational and technical details to generate an ROI score.
               </p>
             </div>
@@ -435,7 +435,7 @@ export function FeatureForm({ selectedProductName, editingFeature, onSave, onCan
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={isSaving}
-              className="inline-flex items-center gap-3 rounded-2xl bg-slate-900 px-10 py-4 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-10 py-4 text-sm font-bold text-white shadow-lg shadow-violet-200 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="h-5 w-5" />
               {editingFeature ? "Commit Changes" : "Save Feature"}
@@ -445,14 +445,14 @@ export function FeatureForm({ selectedProductName, editingFeature, onSave, onCan
 
         <aside className="relative">
           <div className="sticky top-10 space-y-6">
-            <div className="rounded-3xl border border-slate-800 bg-slate-900 p-8 text-white shadow-lg">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+            <div className="rounded-[2.5rem] border border-violet-100 bg-gradient-to-br from-violet-600 to-fuchsia-600 p-8 text-white shadow-2xl shadow-violet-200">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-violet-200">
                 Strategic Intelligence
               </p>
               <div className="mt-8 flex flex-col items-center text-center">
                 <div className="relative">
                   <svg className="h-40 w-40 -rotate-90">
-                    <circle cx="80" cy="80" r="74" className="stroke-slate-700 fill-none" strokeWidth="8" />
+                    <circle cx="80" cy="80" r="74" className="stroke-fuchsia-400/30 fill-none" strokeWidth="8" />
                     <circle 
                       cx="80" cy="80" r="74" 
                       className="stroke-white fill-none transition-all duration-1000" 
@@ -463,8 +463,8 @@ export function FeatureForm({ selectedProductName, editingFeature, onSave, onCan
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <p className="text-5xl font-bold">{previewMetrics.roiScore.toFixed(1)}</p>
-                    <p className="text-xs font-semibold text-slate-400 mt-1">ROI SCORE</p>
+                    <p className="text-5xl font-black">{previewMetrics.roiScore.toFixed(1)}</p>
+                    <p className="text-xs font-bold text-violet-200 mt-1">ROI SCORE</p>
                   </div>
                 </div>
                 
@@ -472,10 +472,10 @@ export function FeatureForm({ selectedProductName, editingFeature, onSave, onCan
                   <motion.div 
                     initial={{ scale: 0, opacity: 0 }} 
                     animate={{ scale: 1, opacity: 1 }}
-                    className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-white/5 px-6 py-3 backdrop-blur-xl border border-white/10"
+                    className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-white/10 px-6 py-3 backdrop-blur-xl border border-white/20 shadow-lg"
                   >
-                    <p className="text-sm font-semibold uppercase tracking-widest text-slate-300">Ranked:</p>
-                    <p className="text-2xl font-bold text-white">#{previewRank}</p>
+                    <p className="text-sm font-bold uppercase tracking-widest text-violet-100">Ranked:</p>
+                    <p className="text-2xl font-black text-white">#{previewRank}</p>
                   </motion.div>
                 )}
               </div>

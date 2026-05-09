@@ -12,9 +12,9 @@ function SummaryMetric({ label, value, tone }) {
 
 export function SummaryBar({ summary }) {
   const chartData = [
-    { name: "Hours", value: Number(summary.totalMonthlyHoursSaved.toFixed(1)), color: "#64748b" },
-    { name: "Cost", value: Number(summary.totalMonthlyNetSavings.toFixed(0)) / 1000, color: "#94a3b8" },
-    { name: "Users", value: summary.totalUsersImpacted, color: "#cbd5e1" }
+    { name: "Hours", value: Number(summary.totalMonthlyHoursSaved.toFixed(1)), color: "#a855f7" },
+    { name: "Cost", value: Number(summary.totalMonthlyNetSavings.toFixed(0)) / 1000, color: "#10b981" },
+    { name: "Users", value: summary.totalUsersImpacted, color: "#f59e0b" }
   ];
 
   return (
@@ -22,8 +22,8 @@ export function SummaryBar({ summary }) {
       <div className="grid gap-8 xl:grid-cols-[1fr_320px]">
         <div>
           <div className="flex items-center gap-2 mb-5">
-            <div className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-            <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">
+            <div className="h-2 w-2 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-violet-600">
               Portfolio Intelligence
             </p>
           </div>
@@ -41,17 +41,17 @@ export function SummaryBar({ summary }) {
             <SummaryMetric
               label="Hours Saved / Month"
               value={formatHours(summary.totalMonthlyHoursSaved)}
-              tone="border-slate-200 bg-slate-50/50"
+              tone="border-purple-200 bg-purple-50 text-purple-900 shadow-sm"
             />
             <SummaryMetric
               label="Net Monthly Profit"
               value={formatCurrency(summary.totalMonthlyNetSavings)}
-              tone="border-slate-200 bg-slate-50/50"
+              tone="border-emerald-200 bg-emerald-50 text-emerald-900 shadow-sm"
             />
             <SummaryMetric
               label="Total Users Impacted"
               value={formatCompactNumber(summary.totalUsersImpacted)}
-              tone="border-slate-200 bg-slate-50/50"
+              tone="border-amber-200 bg-amber-50 text-amber-900 shadow-sm"
             />
           </div>
         </div>
