@@ -55,7 +55,7 @@ export default function App() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-600">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-800 border-t-transparent"></div>
           <p className="text-lg font-medium">Loading FeatureIQ…</p>
         </div>
       </div>
@@ -63,7 +63,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fcfcfd] text-slate-900 font-sans selection:bg-indigo-100">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-slate-200">
       <Toaster
         position="top-right"
         toastOptions={{
@@ -102,17 +102,17 @@ export default function App() {
         <header className="flex flex-col md:flex-row md:items-baseline justify-between gap-6 pb-2">
           <div className="max-w-3xl">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-200">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 text-white shadow-sm border border-slate-700">
                 <Rocket className="h-5 w-5" />
               </div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-indigo-600">
-                Build bet-winning roadmaps
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                Build robust roadmaps
               </p>
             </div>
             <motion.h1
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="mt-4 text-4xl font-extrabold tracking-tight text-orange-500 sm:text-5xl lg:text-6xl"
+              className="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
             >
               FeatureIQ
             </motion.h1>
@@ -120,9 +120,9 @@ export default function App() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
+              className="mt-4 text-3xl font-bold tracking-tight text-slate-700 sm:text-4xl"
             >
-              Precise prioritization for <span className="text-indigo-600">bet-winning</span> roadmaps
+              Precise prioritization for <span className="text-slate-900 border-b-2 border-slate-300">bet-winning</span> roadmaps
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, x: -20 }}
@@ -155,12 +155,12 @@ export default function App() {
                 </a>
               </div>
             </div>
-            <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/40">
-              <div className="flex items-center gap-2 text-sm font-bold text-slate-900">
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <div className="h-2 w-2 rounded-full bg-slate-400 animate-pulse" />
                 FeatureIQ v1.0 Live
               </div>
-              <p className="mt-2 max-w-[200px] text-xs leading-5 text-slate-400">
+              <p className="mt-2 max-w-[200px] text-xs leading-5 text-slate-500">
                 Data is securely persisted and calculated in real-time.
               </p>
             </div>
@@ -218,13 +218,13 @@ export default function App() {
           <motion.section
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="rounded-[3rem] border-2 border-dashed border-slate-200 bg-white p-12 lg:p-20 text-center shadow-xl shadow-slate-100"
+            className="rounded-3xl border-2 border-dashed border-slate-200 bg-white p-12 lg:p-20 text-center shadow-sm"
           >
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 mb-8">
-              <Rocket className="h-10 w-10" />
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-slate-600 mb-8">
+              <Rocket className="h-8 w-8" />
             </div>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Ready to Prioritize?</h2>
-            <p className="mx-auto mt-4 max-w-lg text-lg font-medium text-slate-500 leading-relaxed">
+            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Ready to Prioritize?</h2>
+            <p className="mx-auto mt-4 max-w-lg text-base font-normal text-slate-500 leading-relaxed">
               Step 1: Select a product from the dropdown above to view its strategic roadmap.
               Once selected, you can begin adding features and analyzing their ROI.
             </p>
@@ -235,7 +235,7 @@ export default function App() {
                   const name = window.prompt("Product Name");
                   if (name) createProduct(name);
                 }}
-                className="rounded-2xl bg-indigo-600 px-8 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-100 transition-all hover:bg-indigo-700 hover:shadow-indigo-200 active:scale-95"
+                className="rounded-xl bg-slate-900 px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800 active:scale-95"
               >
                 Create New Product
               </button>

@@ -39,7 +39,7 @@ function SortHeader({ column, sorting, onChange }) {
       type="button"
       onClick={() => onChange(column.key)}
       title={column.label}
-      className="group flex items-center gap-1.5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 transition-colors hover:text-indigo-600 min-w-0"
+      className="group flex items-center gap-1.5 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-400 transition-colors hover:text-slate-800 min-w-0"
     >
       <span className="truncate">{column.label}</span>
       <div className={`flex-shrink-0 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}>
@@ -54,7 +54,7 @@ function DetailField({ label, value, icon: Icon }) {
     <div className="rounded-2xl bg-white p-5 border border-slate-100 shadow-sm">
       <div className="flex items-center gap-2 mb-2">
         {Icon && <Icon className="h-3.5 w-3.5 text-slate-400" />}
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{label}</p>
       </div>
       <p className="text-sm font-bold leading-relaxed text-slate-700">{value || "—"}</p>
     </div>
@@ -87,13 +87,13 @@ function CommentComposer({ featureId, onAddComment }) {
     <form className="grid gap-4 rounded-2xl bg-slate-50/50 p-5 border border-slate-100" onSubmit={handleSubmit}>
       <div className="flex flex-col md:flex-row gap-3">
         <input
-          className="md:w-1/3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+          className="md:w-1/3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all"
           placeholder="Your name"
           value={author}
           onChange={(event) => setAuthor(event.target.value)}
         />
         <input
-          className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+          className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all"
           placeholder="Add strategic context or feedback..."
           value={text}
           onChange={(event) => setText(event.target.value)}
@@ -103,7 +103,7 @@ function CommentComposer({ featureId, onAddComment }) {
           whileTap={{ scale: 0.98 }}
           type="submit"
           disabled={isSubmitting}
-          className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50 shadow-md shadow-indigo-100"
+          className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 disabled:opacity-50 shadow-sm"
         >
           Post
         </motion.button>
@@ -147,8 +147,8 @@ function FeatureDetailPanel({ feature, onAddComment, onDeleteComment }) {
 
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1">
-            <MessageSquare className="h-4 w-4 text-indigo-500" />
-            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-900">Discussion History</h4>
+            <MessageSquare className="h-4 w-4 text-slate-400" />
+            <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-700">Discussion History</h4>
           </div>
           <CommentComposer featureId={feature.id} onAddComment={onAddComment} />
           <div className="grid gap-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
@@ -210,18 +210,18 @@ function SectionTable({
   };
 
   return (
-    <section className="rounded-[2.5rem] border border-slate-200 bg-white shadow-[0_20px_80px_-15px_rgba(0,0,0,0.05)] overflow-hidden">
-      <div className="flex items-center justify-between p-8 border-b border-slate-50">
+    <section className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between p-6 border-b border-slate-100">
         <div>
-          <h3 className="text-2xl font-black text-slate-900 tracking-tight">{title}</h3>
-          <p className="mt-1 text-sm font-medium text-slate-400">{subtitle}</p>
+          <h3 className="text-xl font-bold text-slate-900 tracking-tight">{title}</h3>
+          <p className="mt-1 text-sm font-medium text-slate-500">{subtitle}</p>
         </div>
 
         {canCollapse ? (
           <button
             type="button"
             onClick={onToggleCollapsed}
-            className="group flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 transition-all hover:bg-slate-50 hover:text-indigo-600 active:scale-95"
+            className="group flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 transition-all hover:bg-slate-50 hover:text-slate-900 active:scale-95"
           >
             <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${collapsed ? "" : "rotate-180"}`} />
           </button>
@@ -230,7 +230,7 @@ function SectionTable({
 
       {!collapsed && (
         <div className="w-full">
-          <div className={`${TABLE_GRID_CLASS} px-8 py-4 bg-slate-50/50 border-b border-slate-100`}>
+          <div className={`${TABLE_GRID_CLASS} px-6 py-4 bg-slate-50/50 border-b border-slate-100`}>
             {SORTABLE_COLUMNS.map((column) => (
               <SortHeader
                 key={column.key}
@@ -335,7 +335,7 @@ function SectionTable({
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={(e) => { e.stopPropagation(); onEditFeature(feature); }}
-                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-md"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-800 hover:border-slate-300 transition-all shadow-sm"
                       title="Edit feature"
                     >
                       <ArrowUpRight className="h-4 w-4" />

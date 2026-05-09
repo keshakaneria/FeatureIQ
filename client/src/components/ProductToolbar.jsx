@@ -24,7 +24,7 @@ export function ProductToolbar({
             <select
               value={selectedProductId || ""}
               onChange={(event) => onProductChange(event.target.value)}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-6 py-3.5 text-sm font-bold text-slate-700 outline-none transition-all focus:border-indigo-500 focus:bg-white cursor-pointer shadow-sm hover:border-indigo-300"
+              className="rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-800 outline-none transition-all focus:border-slate-400 focus:ring-4 focus:ring-slate-100 cursor-pointer shadow-sm hover:border-slate-300"
             >
               <option value="" disabled>Select a Product...</option>
               {products.map((product) => (
@@ -37,7 +37,7 @@ export function ProductToolbar({
             <button
               type="button"
               onClick={handleCreateProduct}
-              className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-6 py-3.5 text-sm font-bold text-indigo-600 transition-all hover:bg-indigo-100 active:scale-95 shadow-sm"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 active:scale-95 shadow-sm"
             >
               <Plus className="h-4 w-4" />
               New Product
@@ -49,7 +49,7 @@ export function ProductToolbar({
           <button
             type="button"
             onClick={onPrint}
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white transition-all hover:bg-slate-800 active:scale-95 shadow-lg shadow-slate-200"
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 shadow-sm"
           >
             <Printer className="h-4 w-4" />
             Generate PDF Report
