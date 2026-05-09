@@ -103,16 +103,30 @@ export default function App() {
                 Build bet-winning roadmaps
               </p>
             </div>
-            <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-orange-500 sm:text-5xl lg:text-6xl">
+            <motion.h1
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="mt-4 text-4xl font-extrabold tracking-tight text-orange-500 sm:text-5xl lg:text-6xl"
+            >
               FeatureIQ
-            </h1>
-            <h1 className="mt-8 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-              Precised prioritization for <span className="text-indigo-600">bet-winning</span> roadmaps
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-500">
+            </motion.h1>
+            <motion.h1
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
+            >
+              Precise prioritization for <span className="text-indigo-600">bet-winning</span> roadmaps
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mt-6 max-w-2xl text-lg leading-8 text-slate-500 font-medium"
+            >
               Rank features by real-world savings, implementation speed, and executive payoff.
               Built for modern product teams driving operational excellence.
-            </p>
+            </motion.p>
           </div>
           <div className="hidden lg:block">
             <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/40">
@@ -147,7 +161,11 @@ export default function App() {
         />
 
         {selectedProductId ? (
-          <>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col gap-10"
+          >
             <SummaryBar summary={summary} />
 
             <FeatureForm
@@ -166,7 +184,7 @@ export default function App() {
               onEditFeature={setEditingFeature}
               onAddComment={addComment}
             />
-          </>
+          </motion.div>
         ) : (
           <section className="rounded-[2rem] border border-dashed border-slate-300 bg-white/90 px-8 py-14 text-center shadow-[0_24px_70px_rgba(30,41,59,0.08)]">
             <h2 className="text-2xl font-semibold text-slate-900">Select or Create a Product</h2>

@@ -75,7 +75,7 @@ export const demoProducts = [
       {
         id: "feature-3",
         name: "Legacy CSV Import Cleanup",
-        description: "Retire the slow CSV cleanup path and leave the initiative in backlog.",
+        description: "Retire the slow CSV cleanup path and leave the feature in backlog.",
         owner: "Leo",
         status: "Not Implemented",
         targetReleaseDate: "2026-07-15",

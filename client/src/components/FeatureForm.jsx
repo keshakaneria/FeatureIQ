@@ -132,7 +132,7 @@ export function FeatureForm({ selectedProductName, editingFeature, onSave, onCan
                 Data Entry
               </div>
               <h2 className="mt-4 text-3xl font-extrabold text-slate-900">
-                {editingFeature ? "Modify existing initiative" : `Strategic Input for ${selectedProductName}`}
+                {editingFeature ? "Modify existing feature" : `Strategic Input for ${selectedProductName}`}
               </h2>
               <p className="mt-2 text-slate-500 text-sm">
                 Fill in the operational and technical details to generate an ROI score.
@@ -160,7 +160,7 @@ export function FeatureForm({ selectedProductName, editingFeature, onSave, onCan
               />
             </Field>
 
-            <Field label="Initiative Owner" required tooltip="Primary contact for this feature's delivery.">
+            <Field label="Feature Owner" required tooltip="Primary contact for this feature's delivery.">
               <input
                 className={inputClassName()}
                 value={formValues.owner}
@@ -420,22 +420,26 @@ export function FeatureForm({ selectedProductName, editingFeature, onSave, onCan
                 Cancel Edit
               </button>
             )}
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               type="button"
               onClick={handlePreviewRank}
-              className="inline-flex items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-8 py-4 text-sm font-bold text-indigo-600 transition-all hover:bg-indigo-100 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-8 py-4 text-sm font-bold text-indigo-600 transition-all hover:bg-indigo-100 active:scale-95 shadow-sm"
             >
               <Eye className="h-4 w-4" />
               Preview ROI
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={isSaving}
               className="inline-flex items-center gap-3 rounded-2xl bg-indigo-600 px-10 py-4 text-sm font-bold text-white shadow-xl shadow-indigo-100 transition-all hover:bg-indigo-700 hover:shadow-indigo-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="h-5 w-5" />
-              {editingFeature ? "Commit Changes" : "Save Initiative"}
-            </button>
+              {editingFeature ? "Commit Changes" : "Save Feature"}
+            </motion.button>
           </div>
         </form>
 

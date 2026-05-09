@@ -24,14 +24,14 @@ export const RISK_LEVELS = ["Low", "Medium", "High"];
 export const DEFAULT_PRODUCT_NAME = "Core Product";
 
 export const STATUS_STYLES = {
-  TBD: "bg-slate-200 text-slate-700",
-  "Approved (To Do)": "bg-sky-100 text-sky-700",
-  "In Local UTDD": "bg-violet-100 text-violet-700",
-  "In Dev UTDD": "bg-indigo-100 text-indigo-700",
-  "In QA UTDD": "bg-amber-100 text-amber-700",
-  Released: "bg-emerald-100 text-emerald-700",
-  "Not Implemented": "bg-slate-100 text-slate-600",
-  Cancelled: "bg-rose-100 text-rose-700"
+  TBD: "bg-slate-100 text-slate-500",
+  "Approved (To Do)": "bg-sky-500 text-white shadow-sm",
+  "In Local UTDD": "bg-violet-500 text-white shadow-sm",
+  "In Dev UTDD": "bg-indigo-500 text-white shadow-sm",
+  "In QA UTDD": "bg-orange-500 text-white shadow-sm",
+  Released: "bg-emerald-500 text-white shadow-sm",
+  "Not Implemented": "bg-slate-200 text-slate-600",
+  Cancelled: "bg-rose-500 text-white shadow-sm"
 };
 
 export const SORTABLE_COLUMNS = [

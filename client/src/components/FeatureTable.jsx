@@ -28,7 +28,7 @@ const FILTER_KEYS = [
   { key: "owner", label: "Owner" }
 ];
 
-const TABLE_GRID_CLASS = "grid grid-cols-[50px_minmax(200px,2.5fr)_70px_120px_85px_120px_130px_100px_110px_80px] gap-4 items-center";
+const TABLE_GRID_CLASS = "grid grid-cols-[60px_minmax(280px,3fr)_85px_140px_100px_140px_150px_110px_120px_100px] gap-4 items-center";
 
 function SortHeader({ column, sorting, onChange }) {
   const isActive = sorting.key === column.key;
@@ -97,13 +97,15 @@ function CommentComposer({ featureId, onAddComment }) {
           value={text}
           onChange={(event) => setText(event.target.value)}
         />
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           type="submit"
           disabled={isSubmitting}
-          className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50"
+          className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50 shadow-md shadow-indigo-100"
         >
           Post
-        </button>
+        </motion.button>
       </div>
     </form>
   );
@@ -257,14 +259,16 @@ function SectionTable({
                     <Cell><span className="font-bold text-slate-700 text-xs">{formatBreakeven(feature.breakevenMonths)}</span></Cell>
                     <Cell><span className="font-bold text-slate-700 text-xs">{formatCurrency(feature.implementationCost)}</span></Cell>
                     <Cell>
-                      <select
-                        value={feature.status}
-                        onClick={e => e.stopPropagation()}
-                        onChange={e => handleStatusChange(feature.id, e.target.value)}
-                        className={`rounded-full px-2.5 py-1.5 text-[9px] font-black uppercase tracking-widest outline-none border-none cursor-pointer transition-transform hover:scale-105 ${STATUS_STYLES[feature.status]}`}
-                      >
-                        {ALL_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
+                      <div className="relative inline-block w-full max-w-[130px]">
+                        <select
+                          value={feature.status}
+                          onClick={e => e.stopPropagation()}
+                          onChange={e => handleStatusChange(feature.id, e.target.value)}
+                          className={`w-full rounded-full px-3 py-1.5 text-[9px] font-black uppercase tracking-widest outline-none border-none cursor-pointer transition-transform hover:scale-105 shadow-sm appearance-none ${STATUS_STYLES[feature.status]}`}
+                        >
+                          {ALL_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </div>
                     </Cell>
                     <Cell><span className="text-slate-500 font-semibold text-xs truncate">{feature.owner}</span></Cell>
                     <Cell><span className="text-slate-500 font-semibold text-[10px] whitespace-nowrap">{formatDate(feature.targetReleaseDate)}</span></Cell>
@@ -285,13 +289,15 @@ function SectionTable({
                     )}
                   </AnimatePresence>
 
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <motion.button
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={(e) => { e.stopPropagation(); onEditFeature(feature); }}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-md"
                     >
-                      <ArrowUpRight className="h-3.5 w-3.5" />
-                    </button>
+                      <ArrowUpRight className="h-4 w-4" />
+                    </motion.button>
                   </div>
                 </motion.div>
               ))}
@@ -339,7 +345,7 @@ export function FeatureTable({
           <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300" />
           <input
             className="w-full rounded-[2rem] border border-slate-200 bg-white py-5 pl-14 pr-6 text-base font-medium text-slate-700 outline-none transition-all focus:border-indigo-500 focus:ring-8 focus:ring-indigo-500/5 shadow-sm"
-            placeholder="Search by initiative name or strategic goals..."
+            placeholder="Search by feature name or strategic goals..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -367,8 +373,8 @@ export function FeatureTable({
       </section>
 
       <SectionTable
-        title="Active Strategic Bets"
-        subtitle={`${ongoingFeatures.length} initiatives in execution or review`}
+        title="Active Strategic Features"
+        subtitle={`${ongoingFeatures.length} features in execution or review`}
         features={ongoingFeatures}
         sorting={sorting}
         onSortChange={(key) => onSortingChange({ key, direction: sorting.key === key && sorting.direction === 'desc' ? 'asc' : 'desc' })}

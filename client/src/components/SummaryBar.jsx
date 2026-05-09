@@ -29,47 +29,47 @@ export function SummaryBar({ summary }) {
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             <SummaryMetric
-              label="Active Bets"
+              label="Strategic Features"
               value={formatCompactNumber(summary.ongoingCount)}
-              tone="border-slate-100 bg-slate-50/30"
+              tone="border-slate-200 bg-slate-50 shadow-sm"
             />
             <SummaryMetric
-              label="Future Pipeline"
+              label="Pipeline Backlog"
               value={formatCompactNumber(summary.backlogCount)}
-              tone="border-slate-100 bg-slate-50/30"
+              tone="border-slate-200 bg-slate-50 shadow-sm"
             />
             <SummaryMetric
-              label="Hours Saved / Mo"
+              label="Hours Saved / Month"
               value={formatHours(summary.totalMonthlyHoursSaved)}
-              tone="border-emerald-100 bg-emerald-50/30"
+              tone="border-emerald-200 bg-emerald-50 shadow-sm"
             />
             <SummaryMetric
-              label="Net Profit / Mo"
+              label="Net Monthly Profit"
               value={formatCurrency(summary.totalMonthlyNetSavings)}
-              tone="border-indigo-100 bg-indigo-50/30"
+              tone="border-indigo-200 bg-indigo-50 shadow-sm"
             />
             <SummaryMetric
-              label="Users Impacted"
+              label="Total Users Impacted"
               value={formatCompactNumber(summary.totalUsersImpacted)}
-              tone="border-amber-100 bg-amber-50/30"
+              tone="border-amber-200 bg-amber-50 shadow-sm"
             />
           </div>
         </div>
 
         <div className="rounded-[2rem] border border-slate-100 bg-slate-50/30 p-6">
-          <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-6">Efficiency Distribution</p>
+          <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-6">Efficiency Impact Distribution</p>
           <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#64748b' }} />
                 <Tooltip
                   cursor={{ fill: 'transparent' }}
                   contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', fontSize: '12px', fontWeight: 700 }}
-                  formatter={(value, name) => {
-                    if (name === "value") {
-                      return [typeof value === 'number' && value > 100 ? `${value.toFixed(1)}k` : value, "Score"];
+                  formatter={(value, name, props) => {
+                    if (props.payload.name === "Savings") {
+                      return [formatCurrency(value * 1000), "Value"];
                     }
-                    return [value, name];
+                    return [value, props.payload.name];
                   }}
                 />
                 <Bar dataKey="value" radius={[12, 12, 12, 12]} barSize={32}>
