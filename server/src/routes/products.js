@@ -258,4 +258,30 @@ router.post("/features/:featureId/comments", async (req, res, next) => {
   }
 });
 
+/* ------------------------------------------------------------------ */
+/*  DELETE /features/:id                                              */
+/* ------------------------------------------------------------------ */
+
+router.delete("/features/:id", async (req, res, next) => {
+  try {
+    await pool.query("DELETE FROM features WHERE id = $1", [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/* ------------------------------------------------------------------ */
+/*  DELETE /comments/:id                                              */
+/* ------------------------------------------------------------------ */
+
+router.delete("/comments/:id", async (req, res, next) => {
+  try {
+    await pool.query("DELETE FROM comments WHERE id = $1", [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 export { router as productRoutes };

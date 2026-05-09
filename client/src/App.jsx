@@ -27,6 +27,8 @@ export default function App() {
     saveFeature,
     updateFeatureStatus,
     addComment,
+    deleteFeature,
+    deleteComment,
     isLoading,
     error,
     dataMode
@@ -34,10 +36,13 @@ export default function App() {
   const [sorting, setSorting] = useState(DEFAULT_SORTING);
   const [editingFeature, setEditingFeature] = useState(null);
 
-  const features = useMemo(
-    () => (selectedProduct?.features || []).map(enrichFeature),
-    [selectedProduct]
-  );
+  const features = useMemo(() => {
+    const raw = (selectedProduct?.features || []).map(enrichFeature);
+    // Sort by ROI score once to assign static ranks
+    return [...raw]
+      .sort((a, b) => b.roiScore - a.roiScore)
+      .map((f, i) => ({ ...f, rank: i + 1 }));
+  }, [selectedProduct]);
   const summary = useMemo(() => aggregateProductSummary(selectedProduct?.features || []), [selectedProduct]);
 
   async function handleSaveFeature(featureInput) {
@@ -183,6 +188,8 @@ export default function App() {
               onStatusChange={updateFeatureStatus}
               onEditFeature={setEditingFeature}
               onAddComment={addComment}
+              onDeleteFeature={deleteFeature}
+              onDeleteComment={deleteComment}
             />
           </motion.div>
         ) : (

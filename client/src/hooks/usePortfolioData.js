@@ -221,6 +221,66 @@ export function usePortfolioData() {
   }
 
   /* ---------------------------------------------------------------- */
+  /*  Delete feature                                                  */
+  /* ---------------------------------------------------------------- */
+
+  async function deleteFeature(featureId) {
+    if (!backendAvailable) {
+      setProducts((prev) =>
+        prev.map((product) => {
+          if (product.id !== selectedProductId) return product;
+          return {
+            ...product,
+            features: product.features.filter((f) => f.id !== featureId)
+          };
+        })
+      );
+      return;
+    }
+
+    try {
+      await api.deleteFeature(featureId);
+      await fetchProducts();
+    } catch (err) {
+      console.error("Failed to delete feature:", err);
+      throw new Error(err.message);
+    }
+  }
+
+  /* ---------------------------------------------------------------- */
+  /*  Delete comment                                                  */
+  /* ---------------------------------------------------------------- */
+
+  async function deleteComment(featureId, commentId) {
+    if (!backendAvailable) {
+      setProducts((prev) =>
+        prev.map((product) => {
+          if (product.id !== selectedProductId) return product;
+          return {
+            ...product,
+            features: product.features.map((f) => {
+              if (f.id !== featureId) return f;
+              return {
+                ...f,
+                comments: (f.comments || []).filter((c) => c.id !== commentId)
+              };
+            })
+          };
+        })
+      );
+      return;
+    }
+
+    try {
+      await api.deleteComment(commentId);
+      await fetchProducts();
+    } catch (err) {
+      console.error("Failed to delete comment:", err);
+      throw new Error(err.message);
+    }
+  }
+
+  /* ---------------------------------------------------------------- */
   /*  Return — identical interface to the old hook                    */
   /* ---------------------------------------------------------------- */
 
@@ -233,6 +293,8 @@ export function usePortfolioData() {
     saveFeature,
     updateFeatureStatus,
     addComment,
+    deleteFeature,
+    deleteComment,
     isLoading,
     error,
     dataMode

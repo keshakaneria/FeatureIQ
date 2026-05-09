@@ -59,6 +59,22 @@ export const api = {
     return res.json();
   },
 
+  async deleteFeature(featureId) {
+    const res = await fetch(`${API_BASE}/api/features/${featureId}`, {
+      method: "DELETE"
+    });
+    if (!res.ok) throw new Error(`Failed to delete feature: ${res.statusText}`);
+    return res.json();
+  },
+
+  async deleteComment(commentId) {
+    const res = await fetch(`${API_BASE}/api/comments/${commentId}`, {
+      method: "DELETE"
+    });
+    if (!res.ok) throw new Error(`Failed to delete comment: ${res.statusText}`);
+    return res.json();
+  },
+
   async healthCheck() {
     const res = await fetch(`${API_BASE}/api/health`);
     return res.json();

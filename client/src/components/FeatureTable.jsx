@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, MessageSquare, Search, Filter, ArrowUpRight, Clock, User, Shield } from "lucide-react";
+import { ChevronDown, MessageSquare, Search, Filter, ArrowUpRight, Clock, User, Shield, Trash2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import {
   ALL_STATUSES,
@@ -28,7 +28,7 @@ const FILTER_KEYS = [
   { key: "owner", label: "Owner" }
 ];
 
-const TABLE_GRID_CLASS = "grid grid-cols-[60px_minmax(280px,3fr)_85px_140px_100px_140px_150px_110px_120px_100px] gap-4 items-center";
+const TABLE_GRID_CLASS = "grid grid-cols-[60px_minmax(280px,3fr)_80px_140px_140px_140px_120px_130px_100px] gap-4 items-center";
 
 function SortHeader({ column, sorting, onChange }) {
   const isActive = sorting.key === column.key;
@@ -38,7 +38,8 @@ function SortHeader({ column, sorting, onChange }) {
     <button
       type="button"
       onClick={() => onChange(column.key)}
-      className="group flex items-center gap-1.5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 transition-colors hover:text-indigo-600"
+      title={column.label}
+      className="group flex items-center gap-1.5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 transition-colors hover:text-indigo-600 min-w-0"
     >
       <span className="truncate">{column.label}</span>
       <div className={`flex-shrink-0 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}>
@@ -111,7 +112,17 @@ function CommentComposer({ featureId, onAddComment }) {
   );
 }
 
-function FeatureDetailPanel({ feature, onAddComment }) {
+function FeatureDetailPanel({ feature, onAddComment, onDeleteComment }) {
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Delete this discussion point?")) return;
+    try {
+      await onDeleteComment(feature.id, commentId);
+      toast.success("Comment removed");
+    } catch (e) {
+      toast.error("Delete failed");
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
@@ -120,15 +131,16 @@ function FeatureDetailPanel({ feature, onAddComment }) {
       className="overflow-hidden"
     >
       <div className="p-6 bg-slate-50/30 border-t border-slate-100 grid gap-8">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <DetailField label="Yearly Efficiency Savings" value={formatCurrency(feature.yearlyNetSavings)} icon={ArrowUpRight} />
-          <DetailField label="Hours Freed / Month" value={formatHours(feature.monthlyHoursSaved)} icon={Clock} />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <DetailField label="Total Implementation Cost" value={formatCurrency(feature.implementationCost)} icon={ArrowUpRight} />
+          <DetailField label="Breakeven Point" value={formatBreakeven(feature.breakevenMonths)} icon={Clock} />
+          <DetailField label="Yearly Net Profit" value={formatCurrency(feature.yearlyNetSavings)} icon={ArrowUpRight} />
           <DetailField label="Customer Segment" value={feature.customerSegment} icon={User} />
           <DetailField label="Risk Profile" value={feature.riskLevel} icon={Shield} />
-          <div className="md:col-span-2 lg:col-span-4">
+          <div className="md:col-span-2 xl:col-span-3">
             <DetailField label="Description & Context" value={feature.description} />
           </div>
-          <div className="md:col-span-2 lg:col-span-4">
+          <div className="md:col-span-2 xl:col-span-2">
             <DetailField label="Implementation Notes" value={feature.notes} />
           </div>
         </div>
@@ -142,10 +154,19 @@ function FeatureDetailPanel({ feature, onAddComment }) {
           <div className="grid gap-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
             {(feature.comments || []).length ? (
               [...(feature.comments || [])].reverse().map((comment) => (
-                <div key={comment.id} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                <div key={comment.id} className="group/comment rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-slate-200">
                   <div className="flex items-center justify-between gap-4 mb-2">
-                    <p className="text-sm font-bold text-slate-900">{comment.author}</p>
-                    <p className="text-[10px] font-medium text-slate-400">{formatDate(comment.createdAt)}</p>
+                    <div className="flex items-center gap-3">
+                      <p className="text-sm font-bold text-slate-900">{comment.author}</p>
+                      <p className="text-[10px] font-medium text-slate-400">{formatDate(comment.createdAt)}</p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteComment(comment.id)}
+                      className="opacity-0 group-hover/comment:opacity-100 transition-opacity p-1.5 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50"
+                      title="Delete comment"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                   <p className="text-sm leading-relaxed text-slate-600">{comment.text}</p>
                 </div>
@@ -256,8 +277,7 @@ function SectionTable({
                       </div>
                     </Cell>
                     <Cell><span className="font-bold text-slate-700 text-xs">{formatCurrency(feature.monthlyNetSavings)}</span></Cell>
-                    <Cell><span className="font-bold text-slate-700 text-xs">{formatBreakeven(feature.breakevenMonths)}</span></Cell>
-                    <Cell><span className="font-bold text-slate-700 text-xs">{formatCurrency(feature.implementationCost)}</span></Cell>
+                    <Cell><span className="font-bold text-slate-700 text-xs">{formatHours(feature.monthlyHoursSaved)}</span></Cell>
                     <Cell>
                       <div className="relative inline-block w-full max-w-[130px]">
                         <select
@@ -285,16 +305,36 @@ function SectionTable({
 
                   <AnimatePresence>
                     {expandedId === feature.id && (
-                      <FeatureDetailPanel feature={feature} onAddComment={onAddComment} />
+                      <FeatureDetailPanel
+                        feature={feature}
+                        onAddComment={onAddComment}
+                        onDeleteComment={onDeleteComment}
+                      />
                     )}
                   </AnimatePresence>
 
-                  <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm(`Delete "${feature.name}"?`)) {
+                          onDeleteFeature(feature.id);
+                          toast.success("Feature deleted");
+                        }
+                      }}
+                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-300 hover:text-rose-600 hover:border-rose-200 transition-all shadow-md"
+                      title="Delete feature"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={(e) => { e.stopPropagation(); onEditFeature(feature); }}
                       className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-md"
+                      title="Edit feature"
                     >
                       <ArrowUpRight className="h-4 w-4" />
                     </motion.button>
@@ -319,7 +359,9 @@ export function FeatureTable({
   onSortingChange,
   onStatusChange,
   onEditFeature,
-  onAddComment
+  onAddComment,
+  onDeleteFeature,
+  onDeleteComment
 }) {
   const [filters, setFilters] = useState({ strategicPillar: "", status: "", riskLevel: "", owner: "" });
   const [searchTerm, setSearchTerm] = useState("");

@@ -80,10 +80,7 @@ export function sortFeatures(features, sorting) {
     return compareValues(left[sorting.key], right[sorting.key], sorting.direction);
   });
 
-  return sorted.map((feature, index) => ({
-    ...feature,
-    rank: index + 1
-  }));
+  return sorted;
 }
 
 export function filterFeatures(features, filters, searchTerm) {

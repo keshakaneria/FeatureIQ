@@ -13,7 +13,7 @@ function SummaryMetric({ label, value, tone }) {
 export function SummaryBar({ summary }) {
   const chartData = [
     { name: "Hours", value: Number(summary.totalMonthlyHoursSaved.toFixed(1)), color: "#6366f1" },
-    { name: "Savings", value: Number(summary.totalMonthlyNetSavings.toFixed(0)) / 1000, color: "#10b981" },
+    { name: "Cost", value: Number(summary.totalMonthlyNetSavings.toFixed(0)) / 1000, color: "#10b981" },
     { name: "Users", value: summary.totalUsersImpacted, color: "#f59e0b" }
   ];
 
@@ -66,10 +66,11 @@ export function SummaryBar({ summary }) {
                   cursor={{ fill: 'transparent' }}
                   contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', fontSize: '12px', fontWeight: 700 }}
                   formatter={(value, name, props) => {
-                    if (props.payload.name === "Savings") {
-                      return [formatCurrency(value * 1000), "Value"];
-                    }
-                    return [value, props.payload.name];
+                    const type = props.payload.name;
+                    if (type === "Cost") return [`$${(value * 1000).toLocaleString()}`];
+                    if (type === "Hours") return [`${value}`];
+                    if (type === "Users") return [`${value}`];
+                    return [value, name];
                   }}
                 />
                 <Bar dataKey="value" radius={[12, 12, 12, 12]} barSize={32}>
