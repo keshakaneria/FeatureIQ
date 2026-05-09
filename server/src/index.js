@@ -1,11 +1,11 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import serverless from "serverless-http";
 import { productRoutes } from "./routes/products.js";
 import pool from "./db.js";
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json({ limit: "5mb" }));
@@ -29,7 +29,13 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: err.message || "Internal server error" });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 FeatureIQ API running on http://localhost:${PORT}`);
-  console.log(`📦 Database: ${process.env.DATABASE_URL ? "Neon Postgres connected" : "⚠️  DATABASE_URL not set!"}`);
-});
+// Start server locally if not in a serverless environment
+if (!process.env.NETLIFY) {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`🚀 FeatureIQ API running on http://localhost:${PORT}`);
+    console.log(`📦 Database: ${process.env.DATABASE_URL ? "Neon Postgres connected" : "⚠️  DATABASE_URL not set!"}`);
+  });
+}
+
+export const handler = serverless(app);
