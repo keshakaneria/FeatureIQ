@@ -2,7 +2,7 @@
 
 Feature ROI Prioritisation Tool is a table-first MVP for PMs and executives who need to compare feature bets across multiple products using concrete cost, savings, and breakeven data instead of speculative impact guesses.
 
-The app is built as a static React application hosted on GitHub Pages, with Firebase Firestore used directly from the client for persistent shared data. When Firebase variables are not configured, the app falls back to a local demo mode so the UI can still be explored immediately.
+The app consists of a React frontend and an Express REST API backend using a PostgreSQL database (Neon). If the backend is not reachable, the frontend falls back to a local demo mode using browser `localStorage` so the UI can still be explored.
 
 ## MVP scope
 
@@ -10,104 +10,89 @@ The app is built as a static React application hosted on GitHub Pages, with Fire
 - Live product summary bar with counts, time saved, net savings, and users impacted
 - Feature form with required and optional sections plus live ROI preview
 - Ongoing and backlog tables with sorting, filtering, search, row expansion, comments, and status movement between sections
-- Firestore persistence for products, features, and comments
-- GitHub Pages deployment through GitHub Actions
+- PostgreSQL persistence for products, features, and comments
+- Express.js REST API backend
 
 ## Tech stack
 
-- React + Vite
-- Tailwind CSS
-- Firebase Firestore
-- Framer Motion
-- Recharts
-- Lucide React
-- GitHub Pages + GitHub Actions
+- **Frontend:** React + Vite, Tailwind CSS, Framer Motion, Recharts, Lucide React
+- **Backend:** Express.js, PostgreSQL (via `pg` driver)
+- **Database:** Neon Postgres
 
 ## Local setup
 
-1. Change dir and Install dependencies:
+To run the application locally, you need to set up both the backend server and the frontend client.
 
+### 1. Database Setup
+
+1. Create a free PostgreSQL database on [Neon](https://console.neon.tech).
+2. Copy your connection string (it looks like `postgresql://username:password@ep-...neon.tech/neondb?sslmode=require`).
+
+### 2. Backend Setup
+
+Open a terminal and set up the server:
+
+1. Change directory and install dependencies:
+   ```bash
+   cd server
+   npm install
+   ```
+
+2. Create the environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Open `server/.env` and paste your Neon connection string:
+   ```
+   DATABASE_URL=postgresql://username:password@...
+   PORT=3001
+   ```
+
+4. Run the database migrations to create the tables:
+   ```bash
+   npm run migrate
+   ```
+
+5. (Optional) Seed the database with demo data:
+   ```bash
+   npm run seed
+   ```
+
+6. Start the backend server:
+   ```bash
+   npm run dev
+   ```
+   The backend will run on `http://localhost:3001`.
+
+### 3. Frontend Setup
+
+Open a **new terminal window** and set up the client:
+
+1. Change directory and install dependencies:
    ```bash
    cd client
    npm install
    ```
 
-2. Copy the client environment file:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-3. Fill in your Firebase web app variables in `.env`.
-
-4. Start the client:
-
+2. Start the frontend client:
    ```bash
    npm run dev
    ```
 
-5. Open:
-
+3. Open your browser:
    ```text
    http://localhost:5173
    ```
+   *Note: In development, Vite automatically proxies `/api` requests to the backend at `localhost:3001`.*
 
-If Firebase is not configured, the app runs in demo mode with browser-local persistence only.
-
-## Firebase setup
-
-1. Create a Firebase project on the free tier.
-2. Enable Firestore in production or test mode depending on your evaluation needs.
-3. Create a Web App in Firebase and copy the config values into `.env`.
-4. Add the same values as GitHub repository secrets for the deploy workflow:
-   `VITE_FIREBASE_API_KEY`
-   `VITE_FIREBASE_AUTH_DOMAIN`
-   `VITE_FIREBASE_PROJECT_ID`
-   `VITE_FIREBASE_STORAGE_BUCKET`
-   `VITE_FIREBASE_MESSAGING_SENDER_ID`
-   `VITE_FIREBASE_APP_ID`
-   `VITE_FIRESTORE_PRODUCTS_COLLECTION`
-
-Recommended Firestore rule for an open-link MVP:
-
-```text
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /roiProducts/{document=**} {
-      allow read, write: if true;
-    }
-  }
-}
-```
-
-This is intentionally open because V1 has no authentication. Tighten it before any production usage with sensitive data.
-
-## Build and deploy
-
-- Local build:
-
-  ```bash
-  npm run build --workspace client
-  ```
-
-- Local lint:
-
-  ```bash
-  npm run lint --workspace client
-  ```
-
-- Automatic deploy:
-  Push to `main` and the GitHub Actions workflow in [`.github/workflows/deploy.yml`](/Users/keshakaneria/Documents/New%20project/.github/workflows/deploy.yml) builds `client/dist` and publishes it to GitHub Pages.
+If the backend is not running or unreachable, the frontend will show "Local Demo Mode" and use browser persistence only. When connected to the backend, it will show "Cloud Sync Active".
 
 ## Architecture notes
 
-Detailed architecture and tradeoff documentation lives in [docs/architecture.md](/Users/keshakaneria/Documents/New%20project/docs/architecture.md).
-
-## Important MVP decisions
-
-- Firestore stores one document per product with the product feature list embedded. This keeps the client simple and is enough for a lightweight portfolio MVP.
-- ROI scoring is centralized in a single utility so weights can be tuned later without rewriting the UI.
+- The database schema is fully normalized into three tables: `products`, `features`, and `comments`.
+- All database interactions go through a clean REST API in the Express backend.
+- ROI scoring is centralized in a single utility in the frontend so weights can be tuned later.
 - Comments are anonymous by design and only ask for free-text author names.
 - The app is optimized for comparison speed on desktop first, but remains usable on mobile through horizontal table scrolling and stacked form sections.
 

@@ -47,6 +47,16 @@ export const SORTABLE_COLUMNS = [
   { key: "riskLevel", label: "Risk Level" }
 ];
 
+export const CUSTOMER_SEGMENTS = [
+  "Internal Operations",
+  "End Customers",
+  "Enterprise Partners",
+  "Small Business Owners",
+  "Executive Team",
+  "Product Managers",
+  "Developers"
+];
+
 export const EMPTY_FEATURE = {
   name: "",
   description: "",
@@ -55,22 +65,22 @@ export const EMPTY_FEATURE = {
   targetReleaseDate: "",
   strategicPillar: STRATEGIC_PILLARS[0],
   riskLevel: "Medium",
-  resourceCount: 1,
-  estimatedDays: 10,
-  baseDailyRate: 400,
+  resourceCount: 0,
+  estimatedDays: 0,
+  baseHourlyRate: 0,
   monthlyMaintenanceCost: 0,
   monthlyCloudCost: 0,
-  manualHoursBefore: 8,
-  resourcesBefore: 1,
-  hourlyCostBefore: 50,
-  automatedHoursAfter: 2,
-  resourcesAfter: 1,
-  hourlyCostAfter: 50,
-  processesPerMonth: 10,
-  opportunityCost: "",
-  revenueLossPerMonth: "",
+  manualHoursBefore: 0,
+  resourcesBefore: 0,
+  hourlyCostBefore: 0,
+  automatedHoursAfter: 0,
+  resourcesAfter: 0,
+  hourlyCostAfter: 0,
+  processesPerMonth: 0,
+  opportunityCost: 0,
+  revenueLossPerMonth: 0,
   notes: "",
-  customerSegment: "",
+  customerSegment: CUSTOMER_SEGMENTS[0],
   dependencies: "",
   usersImpacted: 0
 };

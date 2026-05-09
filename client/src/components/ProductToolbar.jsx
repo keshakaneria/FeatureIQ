@@ -17,18 +17,26 @@ export function ProductToolbar({
   }
 
   return (
-    <section className="rounded-3xl border border-white/70 bg-white/85 p-5 shadow-[0_24px_70px_rgba(30,41,59,0.08)] backdrop-blur">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-indigo-500">
-            Multi-product portfolio
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
+    <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
+          <div className="flex items-center gap-3 pr-6 border-r border-slate-100">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+              <Database className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Environment</p>
+              <p className="text-sm font-bold text-slate-900">{dataMode === "postgres" ? "Cloud Sync Active" : "Local Demo Mode"}</p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
             <select
-              value={selectedProductId}
+              value={selectedProductId || ""}
               onChange={(event) => onProductChange(event.target.value)}
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-indigo-300 focus:bg-white"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-6 py-3.5 text-sm font-bold text-slate-700 outline-none transition-all focus:border-indigo-500 focus:bg-white cursor-pointer shadow-sm hover:border-indigo-300"
             >
+              <option value="" disabled>Select a Product Portfolio...</option>
               {products.map((product) => (
                 <option key={product.id} value={product.id}>
                   {product.name}
@@ -39,27 +47,22 @@ export function ProductToolbar({
             <button
               type="button"
               onClick={handleCreateProduct}
-              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-6 py-3.5 text-sm font-bold text-indigo-600 transition-all hover:bg-indigo-100 active:scale-95 shadow-sm"
             >
               <Plus className="h-4 w-4" />
-              Add product
+              New Product
             </button>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white">
-            <Database className="h-3.5 w-3.5" />
-            {dataMode === "firestore" ? "Firestore Live" : "Demo Mode"}
-          </div>
-
+        <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={onPrint}
-            className="inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500"
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white transition-all hover:bg-slate-800 active:scale-95 shadow-lg shadow-slate-200"
           >
             <Printer className="h-4 w-4" />
-            Print view
+            Generate PDF Report
           </button>
         </div>
       </div>

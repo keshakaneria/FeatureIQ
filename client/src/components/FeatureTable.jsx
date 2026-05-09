@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, MessageSquare, Search } from "lucide-react";
+import { ChevronDown, MessageSquare, Search, Filter, ArrowUpRight, Clock, User, Shield } from "lucide-react";
+import { toast } from "react-hot-toast";
 import {
   ALL_STATUSES,
   BACKLOG_STATUSES,
@@ -21,37 +22,13 @@ import {
 } from "../utils/format";
 
 const FILTER_KEYS = [
-  { key: "strategicPillar", label: "Strategic Pillar" },
+  { key: "strategicPillar", label: "Pillar" },
   { key: "status", label: "Status" },
-  { key: "riskLevel", label: "Risk Level" },
+  { key: "riskLevel", label: "Risk" },
   { key: "owner", label: "Owner" }
 ];
 
-function getRiskRowTone(riskLevel, index) {
-  const alternating = index % 2 === 0 ? "bg-white/90" : "bg-slate-50/90";
-
-  if (riskLevel === "Low") {
-    return `${alternating} border-emerald-100`;
-  }
-
-  if (riskLevel === "Medium") {
-    return `${alternating} border-amber-100`;
-  }
-
-  return `${alternating} border-rose-100`;
-}
-
-function getRiskHighlight(riskLevel) {
-  if (riskLevel === "Low") {
-    return "bg-emerald-50";
-  }
-
-  if (riskLevel === "Medium") {
-    return "bg-amber-50";
-  }
-
-  return "bg-rose-50";
-}
+const TABLE_GRID_CLASS = "grid grid-cols-[50px_minmax(200px,2.5fr)_70px_120px_85px_120px_130px_100px_110px_80px] gap-4 items-center";
 
 function SortHeader({ column, sorting, onChange }) {
   const isActive = sorting.key === column.key;
@@ -61,54 +38,24 @@ function SortHeader({ column, sorting, onChange }) {
     <button
       type="button"
       onClick={() => onChange(column.key)}
-      className="text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-900"
+      className="group flex items-center gap-1.5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 transition-colors hover:text-indigo-600"
     >
-      {column.label}
-      <span className="ml-2 text-[10px] text-slate-400">
-        {isActive ? (direction === "desc" ? "↓" : "↑") : ""}
-      </span>
+      <span className="truncate">{column.label}</span>
+      <div className={`flex-shrink-0 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}>
+        <ChevronDown className={`h-3 w-3 transition-transform ${isActive && direction === 'asc' ? 'rotate-180' : ''}`} />
+      </div>
     </button>
   );
 }
 
-function FilterChipGroup({ label, value, options, onChange }) {
+function DetailField({ label, value, icon: Icon }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-        {label}
-      </span>
-      <button
-        type="button"
-        onClick={() => onChange("")}
-        className={`rounded-full px-3 py-2 text-xs font-medium transition ${
-          !value ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-100"
-        }`}
-      >
-        All
-      </button>
-      {options.map((option) => (
-        <button
-          key={option}
-          type="button"
-          onClick={() => onChange(option)}
-          className={`rounded-full px-3 py-2 text-xs font-medium transition ${
-            value === option
-              ? "bg-indigo-600 text-white"
-              : "bg-white text-slate-600 hover:bg-slate-100"
-          }`}
-        >
-          {option}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function DetailField({ label, value }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-700">{value || "Not provided"}</p>
+    <div className="rounded-2xl bg-white p-5 border border-slate-100 shadow-sm">
+      <div className="flex items-center gap-2 mb-2">
+        {Icon && <Icon className="h-3.5 w-3.5 text-slate-400" />}
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
+      </div>
+      <p className="text-sm font-bold leading-relaxed text-slate-700">{value || "—"}</p>
     </div>
   );
 }
@@ -116,44 +63,46 @@ function DetailField({ label, value }) {
 function CommentComposer({ featureId, onAddComment }) {
   const [author, setAuthor] = useState("");
   const [text, setText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (!author.trim() || !text.trim() || isSubmitting) return;
 
-    if (!author.trim() || !text.trim()) {
-      return;
+    setIsSubmitting(true);
+    try {
+      await onAddComment(featureId, { author: author.trim(), text: text.trim() });
+      toast.success("Comment added");
+      setAuthor("");
+      setText("");
+    } catch (e) {
+      toast.error("Comment failed");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    await onAddComment(featureId, {
-      author: author.trim(),
-      text: text.trim()
-    });
-    setAuthor("");
-    setText("");
   }
 
   return (
-    <form className="grid gap-3 rounded-3xl border border-slate-200 bg-slate-50 p-4" onSubmit={handleSubmit}>
-      <div className="grid gap-3 md:grid-cols-[0.35fr_1fr]">
+    <form className="grid gap-4 rounded-2xl bg-slate-50/50 p-5 border border-slate-100" onSubmit={handleSubmit}>
+      <div className="flex flex-col md:flex-row gap-3">
         <input
-          className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
-          placeholder="Author name"
+          className="md:w-1/3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+          placeholder="Your name"
           value={author}
           onChange={(event) => setAuthor(event.target.value)}
         />
         <input
-          className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
-          placeholder="Add a comment for discussion or review"
+          className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+          placeholder="Add strategic context or feedback..."
           value={text}
           onChange={(event) => setText(event.target.value)}
         />
-      </div>
-      <div className="flex justify-end">
         <button
           type="submit"
-          className="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+          disabled={isSubmitting}
+          className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50"
         >
-          Save comment
+          Post
         </button>
       </div>
     </form>
@@ -163,66 +112,48 @@ function CommentComposer({ featureId, onAddComment }) {
 function FeatureDetailPanel({ feature, onAddComment }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: -6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -6 }}
-      className="rounded-[1.75rem] border border-slate-200 bg-slate-50/80 p-4"
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: "auto" }}
+      exit={{ opacity: 0, height: 0 }}
+      className="overflow-hidden"
     >
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <DetailField label="Yearly Net Savings" value={formatCurrency(feature.yearlyNetSavings)} />
-        <DetailField label="Monthly Hours Saved" value={formatHours(feature.monthlyHoursSaved)} />
-        <DetailField label="Yearly Hours Saved" value={formatHours(feature.yearlyHoursSaved)} />
-        <DetailField
-          label="Cost Saved / Process"
-          value={formatCurrency(feature.costSavedPerProcess)}
-        />
-        <DetailField
-          label="Time Saved / Process"
-          value={formatHours(feature.timeSavedPerProcess)}
-        />
-        <DetailField
-          label="Opportunity Cost"
-          value={feature.opportunityCost ? formatCurrency(Number(feature.opportunityCost)) : ""}
-        />
-        <DetailField
-          label="Revenue Loss / Month"
-          value={
-            feature.revenueLossPerMonth
-              ? formatCurrency(Number(feature.revenueLossPerMonth))
-              : ""
-          }
-        />
-        <DetailField label="Strategic Pillar" value={feature.strategicPillar} />
-        <DetailField label="Customer Segment" value={feature.customerSegment} />
-        <DetailField label="Dependencies" value={feature.dependencies} />
-        <DetailField label="Description" value={feature.description} />
-        <DetailField label="Notes" value={feature.notes} />
-      </div>
-
-      <div className="mt-4 grid gap-3">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 text-slate-500" />
-          <p className="text-sm font-semibold text-slate-700">Comments</p>
+      <div className="p-6 bg-slate-50/30 border-t border-slate-100 grid gap-8">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <DetailField label="Yearly Efficiency Savings" value={formatCurrency(feature.yearlyNetSavings)} icon={ArrowUpRight} />
+          <DetailField label="Hours Freed / Month" value={formatHours(feature.monthlyHoursSaved)} icon={Clock} />
+          <DetailField label="Customer Segment" value={feature.customerSegment} icon={User} />
+          <DetailField label="Risk Profile" value={feature.riskLevel} icon={Shield} />
+          <div className="md:col-span-2 lg:col-span-4">
+            <DetailField label="Description & Context" value={feature.description} />
+          </div>
+          <div className="md:col-span-2 lg:col-span-4">
+            <DetailField label="Implementation Notes" value={feature.notes} />
+          </div>
         </div>
 
-        <CommentComposer featureId={feature.id} onAddComment={onAddComment} />
-
-        <div className="grid gap-3">
-          {(feature.comments || []).length ? (
-            feature.comments.map((comment) => (
-              <div key={comment.id} className="rounded-2xl border border-slate-200 bg-white p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-slate-800">{comment.author}</p>
-                  <p className="text-xs text-slate-400">{formatDate(comment.createdAt)}</p>
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 px-1">
+            <MessageSquare className="h-4 w-4 text-indigo-500" />
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-900">Discussion History</h4>
+          </div>
+          <CommentComposer featureId={feature.id} onAddComment={onAddComment} />
+          <div className="grid gap-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+            {(feature.comments || []).length ? (
+              [...(feature.comments || [])].reverse().map((comment) => (
+                <div key={comment.id} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                  <div className="flex items-center justify-between gap-4 mb-2">
+                    <p className="text-sm font-bold text-slate-900">{comment.author}</p>
+                    <p className="text-[10px] font-medium text-slate-400">{formatDate(comment.createdAt)}</p>
+                  </div>
+                  <p className="text-sm leading-relaxed text-slate-600">{comment.text}</p>
                 </div>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{comment.text}</p>
+              ))
+            ) : (
+              <div className="text-center py-10 rounded-2xl border border-dashed border-slate-200 bg-white text-slate-400 text-sm italic">
+                No context provided in comments yet.
               </div>
-            ))
-          ) : (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-sm text-slate-500">
-              No comments yet.
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </motion.div>
@@ -244,137 +175,136 @@ function SectionTable({
 }) {
   const [expandedId, setExpandedId] = useState("");
 
+  const handleStatusChange = async (featureId, newStatus) => {
+    try {
+      await onStatusChange(featureId, newStatus);
+      toast.success(`Moved to ${newStatus}`);
+    } catch (e) {
+      toast.error("Status update failed");
+    }
+  };
+
   return (
-    <section className="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-[0_24px_70px_rgba(30,41,59,0.08)] backdrop-blur">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <section className="rounded-[2.5rem] border border-slate-200 bg-white shadow-[0_20px_80px_-15px_rgba(0,0,0,0.05)] overflow-hidden">
+      <div className="flex items-center justify-between p-8 border-b border-slate-50">
         <div>
-          <h3 className="text-xl font-semibold text-slate-950">{title}</h3>
-          <p className="mt-1 text-sm text-slate-600">{subtitle}</p>
+          <h3 className="text-2xl font-black text-slate-900 tracking-tight">{title}</h3>
+          <p className="mt-1 text-sm font-medium text-slate-400">{subtitle}</p>
         </div>
 
         {canCollapse ? (
           <button
             type="button"
             onClick={onToggleCollapsed}
-            className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="group flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 transition-all hover:bg-slate-50 hover:text-indigo-600 active:scale-95"
           >
-            {collapsed ? "Expand" : "Collapse"}
-            <ChevronDown className={`h-4 w-4 transition ${collapsed ? "" : "rotate-180"}`} />
+            <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${collapsed ? "" : "rotate-180"}`} />
           </button>
         ) : null}
       </div>
 
-      {!collapsed ? (
-        <div className="mt-5 overflow-x-auto">
-          <div className="min-w-[1120px]">
-            <div className="grid grid-cols-[70px_2.4fr_140px_170px_150px_170px_180px_140px_150px_120px] gap-3 px-3 py-3">
-              {SORTABLE_COLUMNS.map((column) => (
-                <SortHeader
-                  key={column.key}
-                  column={column}
-                  sorting={sorting}
-                  onChange={onSortChange}
-                />
-              ))}
-            </div>
+      {!collapsed && (
+        <div className="w-full">
+          <div className={`${TABLE_GRID_CLASS} px-8 py-4 bg-slate-50/50 border-b border-slate-100`}>
+            {SORTABLE_COLUMNS.map((column) => (
+              <SortHeader
+                key={column.key}
+                column={column}
+                sorting={sorting}
+                onChange={onSortChange}
+              />
+            ))}
+          </div>
 
+          <div className="p-4 space-y-2">
             <AnimatePresence initial={false}>
-              {features.map((feature, index) => (
+              {features.map((feature) => (
                 <motion.div
                   key={feature.id}
                   layout
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.25 }}
-                  className={`mb-3 overflow-hidden rounded-[1.6rem] border ${getRiskRowTone(
-                    feature.riskLevel,
-                    index
-                  )} ${getRiskHighlight(feature.riskLevel)} ${
-                    feature.isNew ? "border-l-4 border-l-amber-400" : ""
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className={`group relative rounded-2xl border border-transparent transition-all duration-200 hover:border-indigo-100 hover:bg-indigo-50/30 ${
+                    expandedId === feature.id ? 'border-indigo-100 bg-indigo-50/30' : 'bg-white'
                   }`}
                 >
                   <div
                     role="button"
                     tabIndex={0}
-                    onClick={() =>
-                      setExpandedId((current) => (current === feature.id ? "" : feature.id))
-                    }
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        setExpandedId((current) => (current === feature.id ? "" : feature.id));
-                      }
-                    }}
-                    className="grid w-full grid-cols-[70px_2.4fr_140px_170px_150px_170px_180px_140px_150px_120px] gap-3 px-3 py-4 text-left transition hover:bg-white/40"
+                    onClick={() => setExpandedId(curr => curr === feature.id ? "" : feature.id)}
+                    className={`${TABLE_GRID_CLASS} px-4 py-4 cursor-pointer`}
                   >
-                    <Cell>{feature.rank}</Cell>
+                    <Cell><span className="font-mono text-slate-400 text-[10px] font-bold">#{feature.rank}</span></Cell>
                     <Cell>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-slate-900">{feature.name}</span>
-                        {feature.isNew ? (
-                          <span className="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-700">
+                      <div className="flex flex-col gap-0.5 min-w-0 pr-2">
+                        <span className="font-bold text-slate-900 text-sm truncate" title={feature.name}>
+                          {feature.name}
+                        </span>
+                        {feature.isNew && (
+                          <span className="w-fit rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-emerald-700">
                             New
                           </span>
-                        ) : null}
+                        )}
                       </div>
                     </Cell>
                     <Cell>
-                      <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-semibold text-white">
-                        {feature.roiScore.toFixed(1)} / 5
-                      </span>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white font-bold text-[11px]">
+                        {feature.roiScore.toFixed(1)}
+                      </div>
                     </Cell>
-                    <Cell>{formatCurrency(feature.monthlyNetSavings)}</Cell>
-                    <Cell>{formatBreakeven(feature.breakevenMonths)}</Cell>
-                    <Cell>{formatCurrency(feature.implementationCost)}</Cell>
+                    <Cell><span className="font-bold text-slate-700 text-xs">{formatCurrency(feature.monthlyNetSavings)}</span></Cell>
+                    <Cell><span className="font-bold text-slate-700 text-xs">{formatBreakeven(feature.breakevenMonths)}</span></Cell>
+                    <Cell><span className="font-bold text-slate-700 text-xs">{formatCurrency(feature.implementationCost)}</span></Cell>
                     <Cell>
                       <select
                         value={feature.status}
-                        onClick={(event) => event.stopPropagation()}
-                        onChange={(event) => onStatusChange(feature.id, event.target.value)}
-                        className={`rounded-full px-3 py-2 text-xs font-semibold outline-none ${STATUS_STYLES[feature.status]}`}
+                        onClick={e => e.stopPropagation()}
+                        onChange={e => handleStatusChange(feature.id, e.target.value)}
+                        className={`rounded-full px-2.5 py-1.5 text-[9px] font-black uppercase tracking-widest outline-none border-none cursor-pointer transition-transform hover:scale-105 ${STATUS_STYLES[feature.status]}`}
                       >
-                        {ALL_STATUSES.map((status) => (
-                          <option key={status} value={status}>
-                            {status}
-                          </option>
-                        ))}
+                        {ALL_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </Cell>
-                    <Cell>{feature.owner}</Cell>
-                    <Cell>{formatDate(feature.targetReleaseDate)}</Cell>
-                    <Cell>{feature.riskLevel}</Cell>
+                    <Cell><span className="text-slate-500 font-semibold text-xs truncate">{feature.owner}</span></Cell>
+                    <Cell><span className="text-slate-500 font-semibold text-[10px] whitespace-nowrap">{formatDate(feature.targetReleaseDate)}</span></Cell>
+                    <Cell>
+                      <div className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest text-center w-full ${
+                        feature.riskLevel === 'High' ? 'text-rose-700 bg-rose-50' :
+                        feature.riskLevel === 'Medium' ? 'text-amber-700 bg-amber-50' :
+                        'text-emerald-700 bg-emerald-50'
+                      }`}>
+                        {feature.riskLevel}
+                      </div>
+                    </Cell>
                   </div>
 
-                  <div className="px-3 pb-3">
-                    <div className="flex justify-end gap-2 pb-3">
-                      <button
-                        type="button"
-                        onClick={() => onEditFeature(feature)}
-                        className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                      >
-                        Edit
-                      </button>
-                    </div>
+                  <AnimatePresence>
+                    {expandedId === feature.id && (
+                      <FeatureDetailPanel feature={feature} onAddComment={onAddComment} />
+                    )}
+                  </AnimatePresence>
 
-                    <AnimatePresence initial={false}>
-                      {expandedId === feature.id ? (
-                        <FeatureDetailPanel feature={feature} onAddComment={onAddComment} />
-                      ) : null}
-                    </AnimatePresence>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onEditFeature(feature); }}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
+                    >
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
         </div>
-      ) : null}
+      )}
     </section>
   );
 }
 
 function Cell({ children }) {
-  return <div className="flex items-center text-sm text-slate-700">{children}</div>;
+  return <div className="flex items-center min-w-0 overflow-hidden">{children}</div>;
 }
 
 export function FeatureTable({
@@ -385,114 +315,81 @@ export function FeatureTable({
   onEditFeature,
   onAddComment
 }) {
-  const [filters, setFilters] = useState({
-    strategicPillar: "",
-    status: "",
-    riskLevel: "",
-    owner: ""
-  });
+  const [filters, setFilters] = useState({ strategicPillar: "", status: "", riskLevel: "", owner: "" });
   const [searchTerm, setSearchTerm] = useState("");
-  const [isBacklogCollapsed, setIsBacklogCollapsed] = useState(true);
+  const [isBacklogCollapsed, setIsBacklogCollapsed] = useState(false);
 
-  const filterOptions = useMemo(
-    () => ({
-      strategicPillar: [...new Set(features.map((feature) => feature.strategicPillar))].filter(Boolean),
-      status: [...new Set(features.map((feature) => feature.status))].filter(Boolean),
-      riskLevel: [...new Set(features.map((feature) => feature.riskLevel))].filter(Boolean),
-      owner: [...new Set(features.map((feature) => feature.owner))].filter(Boolean)
-    }),
-    [features]
-  );
+  const filterOptions = useMemo(() => ({
+    strategicPillar: [...new Set(features.map(f => f.strategicPillar))].filter(Boolean),
+    status: [...new Set(features.map(f => f.status))].filter(Boolean),
+    riskLevel: [...new Set(features.map(f => f.riskLevel))].filter(Boolean),
+    owner: [...new Set(features.map(f => f.owner))].filter(Boolean)
+  }), [features]);
 
-  const filteredFeatures = useMemo(
-    () => filterFeatures(features, filters, searchTerm),
-    [features, filters, searchTerm]
-  );
+  const filteredFeatures = useMemo(() => filterFeatures(features, filters, searchTerm), [features, filters, searchTerm]);
+  const sortedFeatures = useMemo(() => sortFeatures(filteredFeatures, sorting), [filteredFeatures, sorting]);
 
-  const sortedFeatures = useMemo(
-    () => sortFeatures(filteredFeatures, sorting),
-    [filteredFeatures, sorting]
-  );
-
-  const ongoingFeatures = sortedFeatures.filter((feature) => !isBacklogStatus(feature.status));
-  const backlogFeatures = sortedFeatures.filter((feature) => isBacklogStatus(feature.status));
-
-  function handleSortChange(key) {
-    if (sorting.key === key) {
-      onSortingChange({
-        key,
-        direction: sorting.direction === "desc" ? "asc" : "desc"
-      });
-      return;
-    }
-
-    onSortingChange({
-      key,
-      direction:
-        key === "name" || key === "status" || key === "owner" || key === "targetReleaseDate"
-          ? "asc"
-          : "desc"
-    });
-  }
+  const ongoingFeatures = sortedFeatures.filter(f => !isBacklogStatus(f.status));
+  const backlogFeatures = sortedFeatures.filter(f => isBacklogStatus(f.status));
 
   return (
-    <div className="grid gap-6">
-      <section className="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-[0_24px_70px_rgba(30,41,59,0.08)] backdrop-blur">
-        <div className="flex flex-col gap-4">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:bg-white"
-              placeholder="Search by feature name or description"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
-          </div>
+    <div className="grid gap-10">
+      <section className="flex flex-col lg:flex-row lg:items-center gap-6 p-2">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300" />
+          <input
+            className="w-full rounded-[2rem] border border-slate-200 bg-white py-5 pl-14 pr-6 text-base font-medium text-slate-700 outline-none transition-all focus:border-indigo-500 focus:ring-8 focus:ring-indigo-500/5 shadow-sm"
+            placeholder="Search by initiative name or strategic goals..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
 
-          <div className="grid gap-3">
-            {FILTER_KEYS.map((filterItem) => (
-              <FilterChipGroup
-                key={filterItem.key}
-                label={filterItem.label}
-                value={filters[filterItem.key]}
-                options={filterOptions[filterItem.key]}
-                onChange={(nextValue) =>
-                  setFilters((current) => ({
-                    ...current,
-                    [filterItem.key]: nextValue
-                  }))
-                }
-              />
-            ))}
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2 px-2 text-slate-400">
+            <Filter className="h-4 w-4" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Filter By</span>
           </div>
+          {FILTER_KEYS.map((filterItem) => (
+            <div key={filterItem.key} className="relative">
+              <select
+                className="appearance-none rounded-2xl border border-slate-200 bg-white px-6 py-4 pr-12 text-xs font-bold text-slate-600 outline-none transition-all hover:border-indigo-300 hover:bg-slate-50 focus:ring-4 focus:ring-indigo-500/5 cursor-pointer shadow-sm"
+                value={filters[filterItem.key]}
+                onChange={(e) => setFilters(curr => ({ ...curr, [filterItem.key]: e.target.value }))}
+              >
+                <option value="">{filterItem.label}: All</option>
+                {filterOptions[filterItem.key].map(opt => <option key={opt} value={opt}>{opt}</option>)}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300" />
+            </div>
+          ))}
         </div>
       </section>
 
       <SectionTable
-        title="Ongoing features"
-        subtitle={`Statuses included: ${ONGOING_STATUSES.join(", ")}`}
+        title="Active Strategic Bets"
+        subtitle={`${ongoingFeatures.length} initiatives in execution or review`}
         features={ongoingFeatures}
         sorting={sorting}
-        onSortChange={handleSortChange}
+        onSortChange={(key) => onSortingChange({ key, direction: sorting.key === key && sorting.direction === 'desc' ? 'asc' : 'desc' })}
         onStatusChange={onStatusChange}
         onEditFeature={onEditFeature}
         onAddComment={onAddComment}
         collapsed={false}
-        onToggleCollapsed={() => {}}
         canCollapse={false}
       />
 
       <SectionTable
-        title="Backlog"
-        subtitle={`Statuses included: ${BACKLOG_STATUSES.join(", ")}`}
+        title="Future Pipeline"
+        subtitle={`${backlogFeatures.length} opportunities for future consideration`}
         features={backlogFeatures}
         sorting={sorting}
-        onSortChange={handleSortChange}
+        onSortChange={(key) => onSortingChange({ key, direction: sorting.key === key && sorting.direction === 'desc' ? 'asc' : 'desc' })}
         onStatusChange={onStatusChange}
         onEditFeature={onEditFeature}
         onAddComment={onAddComment}
         collapsed={isBacklogCollapsed}
-        onToggleCollapsed={() => setIsBacklogCollapsed((current) => !current)}
+        onToggleCollapsed={() => setIsBacklogCollapsed(!isBacklogCollapsed)}
       />
     </div>
   );

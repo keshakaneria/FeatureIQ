@@ -1,0 +1,176 @@
+import dotenv from "dotenv";
+import pg from "pg";
+
+dotenv.config();
+
+const { Pool } = pg;
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+const demoProducts = [
+  {
+    id: "core-product",
+    name: "Core Product",
+    createdAt: "2026-04-25T10:00:00.000Z",
+    updatedAt: "2026-04-30T10:00:00.000Z",
+    features: [
+      {
+        id: "feature-1",
+        name: "Automated Invoice Reconciliation",
+        description: "Reduce manual finance reconciliation work for mid-market invoices.",
+        owner: "Avery",
+        status: "Approved (To Do)",
+        targetReleaseDate: "2026-05-20",
+        strategicPillar: "Operational Efficiency",
+        riskLevel: "Low",
+        resourceCount: 3, estimatedDays: 18, baseHourlyRate: 55,
+        monthlyMaintenanceCost: 1500, monthlyCloudCost: 600,
+        manualHoursBefore: 6, resourcesBefore: 2, hourlyCostBefore: 45,
+        automatedHoursAfter: 1.5, resourcesAfter: 1, hourlyCostAfter: 50,
+        processesPerMonth: 180, opportunityCost: 20000, revenueLossPerMonth: 5000,
+        notes: "Finance team requested audit logging before release.",
+        customerSegment: "Enterprise Partners",
+        dependencies: "Ledger API v2", usersImpacted: 28,
+        comments: [
+          { id: "comment-1", author: "Sam", text: "CEO asked for a clear breakeven callout in the weekly review.", createdAt: "2026-04-30T07:00:00.000Z" }
+        ]
+      },
+      {
+        id: "feature-2",
+        name: "Churn Rescue Alerts",
+        description: "Flag declining account health for CSM follow-up before renewal risk peaks.",
+        owner: "Priya",
+        status: "TBD",
+        targetReleaseDate: "2026-06-05",
+        strategicPillar: "Revenue Growth",
+        riskLevel: "Medium",
+        resourceCount: 2, estimatedDays: 15, baseHourlyRate: 65,
+        monthlyMaintenanceCost: 800, monthlyCloudCost: 400,
+        manualHoursBefore: 4, resourcesBefore: 2, hourlyCostBefore: 55,
+        automatedHoursAfter: 1, resourcesAfter: 1, hourlyCostAfter: 60,
+        processesPerMonth: 220, opportunityCost: 60000, revenueLossPerMonth: 12000,
+        notes: "Pending data science support for signal thresholds.",
+        customerSegment: "End Customers",
+        dependencies: "Renewal score feed", usersImpacted: 140,
+        comments: []
+      },
+      {
+        id: "feature-3",
+        name: "Legacy CSV Import Cleanup",
+        description: "Retire the slow CSV cleanup path and leave the initiative in backlog.",
+        owner: "Leo",
+        status: "Not Implemented",
+        targetReleaseDate: "2026-07-15",
+        strategicPillar: "Platform Scale",
+        riskLevel: "High",
+        resourceCount: 2, estimatedDays: 12, baseHourlyRate: 50,
+        monthlyMaintenanceCost: 300, monthlyCloudCost: 150,
+        manualHoursBefore: 3, resourcesBefore: 1, hourlyCostBefore: 35,
+        automatedHoursAfter: 2, resourcesAfter: 1, hourlyCostAfter: 35,
+        processesPerMonth: 45, opportunityCost: 0, revenueLossPerMonth: 0,
+        notes: "Parked until data migration completes.",
+        customerSegment: "Small Business Owners",
+        dependencies: "Warehouse migration", usersImpacted: 12,
+        comments: []
+      }
+    ]
+  },
+  {
+    id: "growth-suite",
+    name: "Growth Suite",
+    createdAt: "2026-04-24T10:00:00.000Z",
+    updatedAt: "2026-04-30T10:00:00.000Z",
+    features: [
+      {
+        id: "feature-4",
+        name: "Referral Reward Automation",
+        description: "Automate reward fulfillment and fraud checks for referral campaigns.",
+        owner: "Nina",
+        status: "In Dev UTDD",
+        targetReleaseDate: "2026-05-12",
+        strategicPillar: "Customer Experience",
+        riskLevel: "Low",
+        resourceCount: 4, estimatedDays: 14, baseHourlyRate: 60,
+        monthlyMaintenanceCost: 900, monthlyCloudCost: 550,
+        manualHoursBefore: 5, resourcesBefore: 2, hourlyCostBefore: 40,
+        automatedHoursAfter: 1, resourcesAfter: 1, hourlyCostAfter: 42,
+        processesPerMonth: 260, opportunityCost: 35000, revenueLossPerMonth: 8000,
+        notes: "Security review already scheduled.",
+        customerSegment: "End Customers",
+        dependencies: "Rewards provider webhook", usersImpacted: 320,
+        comments: []
+      }
+    ]
+  }
+];
+
+async function seed() {
+  if (!process.env.DATABASE_URL) {
+    console.error("❌ DATABASE_URL not set");
+    process.exit(1);
+  }
+
+  console.log("🌱 Seeding database...");
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    for (const product of demoProducts) {
+      await client.query(
+        "INSERT INTO products (id, name, created_at, updated_at) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING",
+        [product.id, product.name, product.createdAt, product.updatedAt]
+      );
+
+      for (const f of product.features) {
+        await client.query(
+          `INSERT INTO features (
+            id, product_id, name, description, owner, status,
+            target_release_date, strategic_pillar, risk_level,
+            resource_count, estimated_days, base_hourly_rate,
+            monthly_maintenance_cost, monthly_cloud_cost,
+            manual_hours_before, resources_before, hourly_cost_before,
+            automated_hours_after, resources_after, hourly_cost_after,
+            processes_per_month, opportunity_cost, revenue_loss_per_month,
+            notes, customer_segment, dependencies, users_impacted,
+            created_at, updated_at
+          ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29)
+          ON CONFLICT (id) DO NOTHING`,
+          [
+            f.id, product.id, f.name, f.description, f.owner, f.status,
+            f.targetReleaseDate, f.strategicPillar, f.riskLevel,
+            f.resourceCount, f.estimatedDays, f.baseHourlyRate,
+            f.monthlyMaintenanceCost, f.monthlyCloudCost,
+            f.manualHoursBefore, f.resourcesBefore, f.hourlyCostBefore,
+            f.automatedHoursAfter, f.resourcesAfter, f.hourlyCostAfter,
+            f.processesPerMonth, f.opportunityCost, f.revenueLossPerMonth,
+            f.notes, f.customerSegment, f.dependencies, f.usersImpacted,
+            f.createdAt || new Date().toISOString(), new Date().toISOString()
+          ]
+        );
+
+        for (const c of f.comments) {
+          await client.query(
+            "INSERT INTO comments (id, feature_id, author, body, created_at) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING",
+            [c.id, f.id, c.author, c.text, c.createdAt]
+          );
+        }
+      }
+    }
+
+    await client.query("COMMIT");
+    console.log("✅ Seed complete — demo data inserted.");
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("❌ Seed failed:", err.message);
+    process.exit(1);
+  } finally {
+    client.release();
+    await pool.end();
+  }
+}
+
+seed();

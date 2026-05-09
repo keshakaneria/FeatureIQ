@@ -45,7 +45,8 @@ export function calculateFeatureMetrics(feature) {
   const implementationCost =
     toNumber(feature.resourceCount) *
     toNumber(feature.estimatedDays) *
-    toNumber(feature.baseDailyRate);
+    8 *
+    toNumber(feature.baseHourlyRate);
   const monthlyOperationalCostAfter =
     toNumber(feature.monthlyMaintenanceCost) + toNumber(feature.monthlyCloudCost);
 

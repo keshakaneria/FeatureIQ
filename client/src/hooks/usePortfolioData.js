@@ -1,27 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  addDoc,
-  collection,
-  doc,
-  onSnapshot,
-  query,
-  setDoc
-} from "firebase/firestore";
-import { db, hasFirebaseConfig } from "../config/firebase";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { api } from "../config/api";
 import { DEFAULT_PRODUCT_NAME, EMPTY_FEATURE } from "../constants";
 import { demoProducts } from "../data/demoData";
 
-const PRODUCTS_COLLECTION = import.meta.env.VITE_FIRESTORE_PRODUCTS_COLLECTION || "roiProducts";
 const LOCAL_STORAGE_KEY = "roi-prioritization-demo-products";
 
-function buildProductDocument(product) {
-  return {
-    name: product.name,
-    createdAt: product.createdAt,
-    updatedAt: product.updatedAt,
-    features: product.features
-  };
-}
+// Check if backend is available — determined at first fetch
+let backendAvailable = null;
+
+// Fallback for random ID
+const generateId = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+};
 
 function createProductShape(partial) {
   return {
@@ -35,11 +28,7 @@ function createProductShape(partial) {
 
 function loadDemoProducts() {
   const stored = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-
-  if (!stored) {
-    return demoProducts;
-  }
-
+  if (!stored) return demoProducts;
   try {
     return JSON.parse(stored);
   } catch {
@@ -48,178 +37,192 @@ function loadDemoProducts() {
 }
 
 export function usePortfolioData() {
-  const [products, setProducts] = useState(() =>
-    hasFirebaseConfig ? [] : loadDemoProducts()
-  );
+  const [products, setProducts] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
-  const [isLoading, setIsLoading] = useState(hasFirebaseConfig);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [dataMode, setDataMode] = useState("loading");
 
-  useEffect(() => {
-    if (!hasFirebaseConfig) {
-      return undefined;
+  /* ---------------------------------------------------------------- */
+  /*  Fetch all products from the API (or fall back to demo)          */
+  /* ---------------------------------------------------------------- */
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      const data = await api.getProducts();
+      backendAvailable = true;
+      setDataMode("postgres");
+      setProducts(data.map(createProductShape));
+      setError("");
+    } catch (err) {
+      console.warn("⚠️ Backend not reachable, falling back to demo mode:", err.message);
+      backendAvailable = false;
+      setDataMode("demo");
+      setProducts(loadDemoProducts());
+    } finally {
+      setIsLoading(false);
     }
-
-    const productQuery = query(collection(db, PRODUCTS_COLLECTION));
-    const unsubscribe = onSnapshot(
-      productQuery,
-      (snapshot) => {
-        const nextProducts = snapshot.docs.map((item) =>
-          createProductShape({
-            id: item.id,
-            ...item.data()
-          })
-        );
-
-        setProducts(nextProducts);
-        setIsLoading(false);
-      },
-      (snapshotError) => {
-        setError(snapshotError.message);
-        setIsLoading(false);
-      }
-    );
-
-    return unsubscribe;
   }, []);
 
+  // Initial load
   useEffect(() => {
-    if (!hasFirebaseConfig) {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  // Persist demo-mode data to localStorage
+  useEffect(() => {
+    if (dataMode === "demo") {
       window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(products));
     }
-  }, [products]);
+  }, [products, dataMode]);
 
+  // Auto-select first product when list changes
   useEffect(() => {
     if (!products.length) {
       setSelectedProductId("");
       return;
     }
-
-    if (!selectedProductId || !products.some((product) => product.id === selectedProductId)) {
+    if (!selectedProductId || !products.some((p) => p.id === selectedProductId)) {
       setSelectedProductId(products[0].id);
     }
   }, [products, selectedProductId]);
 
   const selectedProduct = useMemo(
-    () => products.find((product) => product.id === selectedProductId) || null,
+    () => products.find((p) => p.id === selectedProductId) || null,
     [products, selectedProductId]
   );
 
-  async function persistProducts(nextProducts) {
-    setProducts(nextProducts);
-
-    if (!hasFirebaseConfig) {
-      return;
-    }
-
-    const targetProduct = nextProducts.find((product) => product.id === selectedProductId);
-
-    if (targetProduct) {
-      await setDoc(
-        doc(db, PRODUCTS_COLLECTION, targetProduct.id),
-        buildProductDocument(targetProduct)
-      );
-    }
-  }
+  /* ---------------------------------------------------------------- */
+  /*  Create product                                                  */
+  /* ---------------------------------------------------------------- */
 
   async function createProduct(name) {
     const now = new Date().toISOString();
 
-    if (!hasFirebaseConfig) {
-      const nextProduct = createProductShape({
-        id: crypto.randomUUID(),
+    if (!backendAvailable) {
+      const next = createProductShape({
+        id: generateId(),
         name,
         createdAt: now,
         updatedAt: now,
         features: []
       });
-      const nextProducts = [...products, nextProduct];
-      setProducts(nextProducts);
-      setSelectedProductId(nextProduct.id);
+      setProducts((prev) => [...prev, next]);
+      setSelectedProductId(next.id);
       return;
     }
 
-    const response = await addDoc(collection(db, PRODUCTS_COLLECTION), {
-      name,
-      createdAt: now,
-      updatedAt: now,
-      features: []
-    });
-    setSelectedProductId(response.id);
+    try {
+      const created = await api.createProduct(name);
+      setSelectedProductId(created.id);
+      await fetchProducts();
+    } catch (err) {
+      console.error("Failed to create product:", err);
+      throw new Error(`Failed to create product: ${err.message}`);
+    }
   }
+
+  /* ---------------------------------------------------------------- */
+  /*  Save feature (create or update)                                 */
+  /* ---------------------------------------------------------------- */
 
   async function saveFeature(featureInput) {
     if (!selectedProduct) {
-      return;
+      throw new Error("No product selected");
     }
 
     const now = new Date().toISOString();
     const normalizedFeature = {
       ...EMPTY_FEATURE,
       ...featureInput,
-      id: featureInput.id || crypto.randomUUID(),
+      id: featureInput.id || generateId(),
       createdAt: featureInput.createdAt || now,
       updatedAt: now,
       comments: featureInput.comments || []
     };
 
-    const nextProducts = products.map((product) => {
-      if (product.id !== selectedProduct.id) {
-        return product;
-      }
-
-      const hasExistingFeature = product.features.some(
-        (feature) => feature.id === normalizedFeature.id
+    if (!backendAvailable) {
+      // Demo mode: update local state
+      setProducts((prev) =>
+        prev.map((product) => {
+          if (product.id !== selectedProduct.id) return product;
+          const exists = product.features.some((f) => f.id === normalizedFeature.id);
+          const nextFeatures = exists
+            ? product.features.map((f) => (f.id === normalizedFeature.id ? normalizedFeature : f))
+            : [normalizedFeature, ...product.features];
+          return { ...product, updatedAt: now, features: nextFeatures };
+        })
       );
-      const nextFeatures = hasExistingFeature
-        ? product.features.map((feature) =>
-            feature.id === normalizedFeature.id ? normalizedFeature : feature
-          )
-        : [normalizedFeature, ...product.features];
+      return;
+    }
 
-      return {
-        ...product,
-        updatedAt: now,
-        features: nextFeatures
-      };
-    });
-
-    await persistProducts(nextProducts);
+    try {
+      await api.saveFeature(selectedProduct.id, normalizedFeature);
+      await fetchProducts();
+    } catch (err) {
+      console.error("Failed to save feature:", err);
+      throw new Error(err.message);
+    }
   }
+
+  /* ---------------------------------------------------------------- */
+  /*  Update feature status                                           */
+  /* ---------------------------------------------------------------- */
 
   async function updateFeatureStatus(featureId, status) {
-    const targetFeature = selectedProduct?.features.find((feature) => feature.id === featureId);
+    const target = selectedProduct?.features.find((f) => f.id === featureId);
+    if (!target) return;
 
-    if (!targetFeature) {
+    if (!backendAvailable) {
+      await saveFeature({ ...target, status });
       return;
     }
 
-    await saveFeature({
-      ...targetFeature,
-      status
-    });
+    try {
+      await api.updateFeatureStatus(featureId, status);
+      await fetchProducts();
+    } catch (err) {
+      console.error("Failed to update status:", err);
+      throw new Error(err.message);
+    }
   }
+
+  /* ---------------------------------------------------------------- */
+  /*  Add comment                                                     */
+  /* ---------------------------------------------------------------- */
 
   async function addComment(featureId, commentInput) {
-    const targetFeature = selectedProduct?.features.find((feature) => feature.id === featureId);
+    const target = selectedProduct?.features.find((f) => f.id === featureId);
+    if (!target) return;
 
-    if (!targetFeature) {
+    if (!backendAvailable) {
+      await saveFeature({
+        ...target,
+        comments: [
+          ...(target.comments || []),
+          {
+            id: generateId(),
+            author: commentInput.author,
+            text: commentInput.text,
+            createdAt: new Date().toISOString()
+          }
+        ]
+      });
       return;
     }
 
-    await saveFeature({
-      ...targetFeature,
-      comments: [
-        ...(targetFeature.comments || []),
-        {
-          id: crypto.randomUUID(),
-          author: commentInput.author,
-          text: commentInput.text,
-          createdAt: new Date().toISOString()
-        }
-      ]
-    });
+    try {
+      await api.addComment(featureId, commentInput);
+      await fetchProducts();
+    } catch (err) {
+      console.error("Failed to add comment:", err);
+      throw new Error(err.message);
+    }
   }
+
+  /* ---------------------------------------------------------------- */
+  /*  Return — identical interface to the old hook                    */
+  /* ---------------------------------------------------------------- */
 
   return {
     products,
@@ -232,6 +235,6 @@ export function usePortfolioData() {
     addComment,
     isLoading,
     error,
-    dataMode: hasFirebaseConfig ? "firestore" : "demo"
+    dataMode
   };
 }

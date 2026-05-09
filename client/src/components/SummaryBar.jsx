@@ -1,74 +1,82 @@
-import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip, Cell as BarCell } from "recharts";
 import { formatCompactNumber, formatCurrency, formatHours } from "../utils/format";
 
 function SummaryMetric({ label, value, tone }) {
   return (
-    <div className={`rounded-2xl border px-4 py-4 ${tone}`}>
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{label}</p>
-      <p className="mt-3 text-2xl font-semibold text-slate-900">{value}</p>
+    <div className={`rounded-3xl border p-6 transition-all hover:shadow-lg ${tone}`}>
+      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="mt-3 text-3xl font-black text-slate-900 tracking-tight">{value}</p>
     </div>
   );
 }
 
 export function SummaryBar({ summary }) {
   const chartData = [
-    { name: "Hours", value: Number(summary.totalMonthlyHoursSaved.toFixed(1)) },
-    { name: "Savings", value: Number(summary.totalMonthlyNetSavings.toFixed(0)) / 1000 },
-    { name: "Users", value: summary.totalUsersImpacted }
+    { name: "Hours", value: Number(summary.totalMonthlyHoursSaved.toFixed(1)), color: "#6366f1" },
+    { name: "Savings", value: Number(summary.totalMonthlyNetSavings.toFixed(0)) / 1000, color: "#10b981" },
+    { name: "Users", value: summary.totalUsersImpacted, color: "#f59e0b" }
   ];
 
   return (
-    <section className="rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-[0_24px_70px_rgba(30,41,59,0.08)] backdrop-blur">
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+    <section className="rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-[0_20px_80px_-15px_rgba(0,0,0,0.05)]">
+      <div className="grid gap-10 xl:grid-cols-[1fr_360px]">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-indigo-500">
-            Product summary
-          </p>
-          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="h-1.5 w-1.5 rounded-full bg-indigo-600" />
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-600">
+              Product Portfolio Intelligence
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             <SummaryMetric
-              label="Ongoing"
+              label="Active Bets"
               value={formatCompactNumber(summary.ongoingCount)}
-              tone="border-slate-200 bg-slate-50"
+              tone="border-slate-100 bg-slate-50/30"
             />
             <SummaryMetric
-              label="Backlog"
+              label="Future Pipeline"
               value={formatCompactNumber(summary.backlogCount)}
-              tone="border-slate-200 bg-slate-50"
+              tone="border-slate-100 bg-slate-50/30"
             />
             <SummaryMetric
-              label="Hours Saved / Month"
+              label="Hours Saved / Mo"
               value={formatHours(summary.totalMonthlyHoursSaved)}
-              tone="border-emerald-200 bg-emerald-50"
+              tone="border-emerald-100 bg-emerald-50/30"
             />
             <SummaryMetric
-              label="Net Savings / Month"
+              label="Net Profit / Mo"
               value={formatCurrency(summary.totalMonthlyNetSavings)}
-              tone="border-indigo-200 bg-indigo-50"
+              tone="border-indigo-100 bg-indigo-50/30"
             />
             <SummaryMetric
               label="Users Impacted"
               value={formatCompactNumber(summary.totalUsersImpacted)}
-              tone="border-amber-200 bg-amber-50"
+              tone="border-amber-100 bg-amber-50/30"
             />
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-sm font-semibold text-slate-700">Portfolio snapshot</p>
-          <div className="mt-4 h-36">
+        <div className="rounded-[2rem] border border-slate-100 bg-slate-50/30 p-6">
+          <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-6">Efficiency Distribution</p>
+          <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
                 <Tooltip
+                  cursor={{ fill: 'transparent' }}
+                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', fontSize: '12px', fontWeight: 700 }}
                   formatter={(value, name) => {
-                    if (name === "value" && chartData[1].value === value) {
-                      return [`${value}k`, "Savings"];
+                    if (name === "value") {
+                      return [typeof value === 'number' && value > 100 ? `${value.toFixed(1)}k` : value, "Score"];
                     }
-
-                    return [value, "Metric"];
+                    return [value, name];
                   }}
                 />
-                <Bar dataKey="value" fill="#4f46e5" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="value" radius={[12, 12, 12, 12]} barSize={32}>
+                  {chartData.map((entry, index) => (
+                    <BarCell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
