@@ -192,6 +192,8 @@ function SectionTable({
   onStatusChange,
   onEditFeature,
   onAddComment,
+  onDeleteFeature,
+  onDeleteComment,
   collapsed,
   onToggleCollapsed,
   canCollapse = true
@@ -423,19 +425,23 @@ export function FeatureTable({
         onStatusChange={onStatusChange}
         onEditFeature={onEditFeature}
         onAddComment={onAddComment}
+        onDeleteFeature={onDeleteFeature}
+        onDeleteComment={onDeleteComment}
         collapsed={false}
         canCollapse={false}
       />
 
       <SectionTable
-        title="Future Pipeline"
-        subtitle={`${backlogFeatures.length} opportunities for future consideration`}
+        title="Pipeline Backlog"
+        subtitle={`${backlogFeatures.length} features parked or in queue`}
         features={backlogFeatures}
         sorting={sorting}
         onSortChange={(key) => onSortingChange({ key, direction: sorting.key === key && sorting.direction === 'desc' ? 'asc' : 'desc' })}
         onStatusChange={onStatusChange}
         onEditFeature={onEditFeature}
         onAddComment={onAddComment}
+        onDeleteFeature={onDeleteFeature}
+        onDeleteComment={onDeleteComment}
         collapsed={isBacklogCollapsed}
         onToggleCollapsed={() => setIsBacklogCollapsed(!isBacklogCollapsed)}
       />

@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, Rocket } from "lucide-react";
+import { AlertTriangle, Rocket, ExternalLink, Heart } from "lucide-react";
+import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { Toaster } from "react-hot-toast";
 import { FeatureForm } from "./components/FeatureForm";
 import { FeatureTable } from "./components/FeatureTable";
@@ -98,7 +99,7 @@ export default function App() {
         }}
       />
       <main className="mx-auto flex w-full max-w-[1600px] flex-col gap-8 px-6 py-10 lg:px-10">
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2">
+        <header className="flex flex-col md:flex-row md:items-baseline justify-between gap-6 pb-2">
           <div className="max-w-3xl">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-200">
@@ -134,6 +135,26 @@ export default function App() {
             </motion.p>
           </div>
           <div className="hidden lg:block">
+            <div className="flex items-center gap-6 justify-end pb-20 pr-1">
+              <div className="flex items-center gap-6">
+                <a
+                  href="https://github.com/keshakaneria/FeatureIQ"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-slate-900"
+                >
+                  <FaGithub className="h-5 w-5" />
+                </a>
+                <a
+                  href="https://linkedin.com/in/kesha-k-kaneria"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-slate-900"
+                >
+                  <FaLinkedin className="h-5 w-5" />
+                </a>
+              </div>
+            </div>
             <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/40">
               <div className="flex items-center gap-2 text-sm font-bold text-slate-900">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -143,6 +164,7 @@ export default function App() {
                 Data is securely persisted and calculated in real-time.
               </p>
             </div>
+
           </div>
         </header>
 
@@ -193,23 +215,65 @@ export default function App() {
             />
           </motion.div>
         ) : (
-          <section className="rounded-[2rem] border border-dashed border-slate-300 bg-white/90 px-8 py-14 text-center shadow-[0_24px_70px_rgba(30,41,59,0.08)]">
-            <h2 className="text-2xl font-semibold text-slate-900">Select or Create a Product</h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-600">
-              Start by selecting an existing product from the dropdown above or create a new one to begin prioritizing features.
+          <motion.section
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="rounded-[3rem] border-2 border-dashed border-slate-200 bg-white p-12 lg:p-20 text-center shadow-xl shadow-slate-100"
+          >
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 mb-8">
+              <Rocket className="h-10 w-10" />
+            </div>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Ready to Prioritize?</h2>
+            <p className="mx-auto mt-4 max-w-lg text-lg font-medium text-slate-500 leading-relaxed">
+              Step 1: Select a product from the dropdown above to view its strategic roadmap.
+              Once selected, you can begin adding features and analyzing their ROI.
             </p>
-            <button
-              type="button"
-              onClick={() => {
-                const name = window.prompt("Product Name");
-                if (name) createProduct(name);
-              }}
-              className="mt-6 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-            >
-              Create first product
-            </button>
-          </section>
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  const name = window.prompt("Product Name");
+                  if (name) createProduct(name);
+                }}
+                className="rounded-2xl bg-indigo-600 px-8 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-100 transition-all hover:bg-indigo-700 hover:shadow-indigo-200 active:scale-95"
+              >
+                Create New Product
+              </button>
+              <div className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                or use the dropdown to switch
+              </div>
+            </div>
+          </motion.section>
         )}
+
+        <footer className="mt-10 flex flex-col items-center gap-6 border-t border-slate-100 pt-12 pb-16">
+          <div className="flex items-center gap-6">
+            <a
+              href="https://github.com/keshakaneria/FeatureIQ"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-slate-900"
+            >
+              <FaGithub className="h-5 w-5" />
+            </a>
+            <a
+              href="https://linkedin.com/in/kesha-k-kaneria"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-slate-900"
+            >
+              <FaLinkedin className="h-5 w-5" />
+            </a>
+          </div>
+          <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+            Built with <Heart className="h-3 w-3 text-rose-500 fill-rose-500" /> by <a
+              href="https://keshakaneria.netlify.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-indigo-600"
+            ><u>Kesha Kaneria</u></a>
+          </p>
+        </footer>
       </main>
     </div>
   );
