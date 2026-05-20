@@ -2,105 +2,100 @@
 
 Feature ROI Prioritisation Tool is a table-first MVP for PMs and executives who need to compare feature bets across multiple products using concrete cost, savings, and breakeven data instead of speculative impact guesses.
 
-The app consists of a React frontend and an Express REST API backend using a PostgreSQL database (Neon). If the backend is not reachable, the frontend falls back to a local demo mode using browser `localStorage` so the UI can still be explored.
+The app has:
 
-## MVP scope
+- a React + Vite frontend in `client/`
+- a Hono API in `server/`
+- a Neon Postgres database
+- Cloudflare as the intended deployment target:
+  the frontend is designed for Cloudflare Pages and the API for Cloudflare Workers
 
-- Multi-product dashboards with isolated feature lists per product
-- Live product summary bar with counts, time saved, net savings, and users impacted
-- Feature form with required and optional sections plus live ROI preview
-- Ongoing and backlog tables with sorting, filtering, search, row expansion, comments, and status movement between sections
-- PostgreSQL persistence for products, features, and comments
-- Express.js REST API backend
+If the backend is not reachable, the frontend falls back to a local demo mode using browser `localStorage` so the UI can still be explored.
 
 ## Tech stack
 
-- **Frontend:** React + Vite, Tailwind CSS, Framer Motion, Recharts, Lucide React
-- **Backend:** Express.js, PostgreSQL (via `pg` driver)
-- **Database:** Neon Postgres
+- Frontend: React, Vite, Tailwind CSS, Framer Motion, Recharts
+- Backend: Hono
+- Database: Neon Postgres
+- Deployment: Cloudflare Pages + Cloudflare Workers
 
 ## Local setup
 
-To run the application locally, you need to set up both the backend server and the frontend client.
+### 1. Database setup
 
-### 1. Database Setup
+1. Create a PostgreSQL database in [Neon](https://console.neon.tech).
+2. Copy the connection string.
 
-1. Create a free PostgreSQL database on [Neon](https://console.neon.tech).
-2. Copy your connection string (it looks like `postgresql://username:password@ep-...neon.tech/neondb?sslmode=require`).
+### 2. Backend setup
 
-### 2. Backend Setup
+```bash
+cd server
+npm install
+cp .env.example .env
+```
 
-Open a terminal and set up the server:
+Set `DATABASE_URL` in `server/.env`, then run:
 
-1. Change directory and install dependencies:
+```bash
+npm run migrate
+npm run dev
+```
+
+The local API runs on `http://localhost:3001`.
+
+### 3. Frontend setup
+
+In a second terminal:
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+The app runs on `http://localhost:5173`.
+
+In development, Vite proxies `/api` requests to `http://localhost:3001`.
+
+## Cloudflare deployment
+
+### API: Cloudflare Workers
+
+1. Install dependencies in `server/`.
+2. Authenticate Wrangler:
+   ```bash
+   npx wrangler login
+   ```
+3. Add the production database secret:
    ```bash
    cd server
-   npm install
+   npx wrangler secret put DATABASE_URL
    ```
-
-2. Create the environment file:
+4. Deploy the API:
    ```bash
-   cp .env.example .env
+   npm run deploy
    ```
 
-3. Open `server/.env` and paste your Neon connection string:
-   ```
-   DATABASE_URL=postgresql://username:password@...
-   PORT=3001
-   ```
+After deploy, note the Worker URL, such as `https://featureiq-api.<subdomain>.workers.dev`.
 
-4. Run the database migrations to create the tables:
-   ```bash
-   npm run migrate
-   ```
+### Frontend: Cloudflare Pages
 
-5. (Optional) Seed the database with demo data:
-   ```bash
-   npm run seed
-   ```
+Create a Cloudflare Pages project with:
 
-6. Start the backend server:
-   ```bash
-   npm run dev
-   ```
-   The backend will run on `http://localhost:3001`.
+- Root directory: `client`
+- Build command: `npm run build`
+- Build output directory: `dist`
 
-### 3. Frontend Setup
+Set this environment variable in Pages:
 
-Open a **new terminal window** and set up the client:
+```text
+VITE_API_URL=https://featureiq-api.<subdomain>.workers.dev
+```
 
-1. Change directory and install dependencies:
-   ```bash
-   cd client
-   npm install
-   ```
+The repo includes `client/public/_redirects` so SPA routes resolve correctly on Pages.
 
-2. Start the frontend client:
-   ```bash
-   npm run dev
-   ```
+## Notes
 
-3. Open your browser:
-   ```text
-   http://localhost:5173
-   ```
-   *Note: In development, Vite automatically proxies `/api` requests to the backend at `localhost:3001`.*
-
-If the backend is not running or unreachable, the frontend will show "Local Demo Mode" and use browser persistence only. When connected to the backend, it will show "Cloud Sync Active".
-
-## Architecture notes
-
-- The database schema is fully normalized into three tables: `products`, `features`, and `comments`.
-- All database interactions go through a clean REST API in the Express backend.
-- ROI scoring is centralized in a single utility in the frontend so weights can be tuned later.
-- Comments are anonymous by design and only ask for free-text author names.
-- The app is optimized for comparison speed on desktop first, but remains usable on mobile through horizontal table scrolling and stacked form sections.
-
-## Out of scope for V1
-
-- Authentication
-- Email notifications
-- Slack or Jira integrations
-- CSV import
-- Cross-product comparison views
-- AI-generated prioritisation suggestions
+- The backend uses the same Neon database locally and in Cloudflare.
+- `client/src/config/api.js` uses `VITE_API_URL` in production and relative `/api` calls in local dev.
+- Vite now builds with root-relative asset paths, which is safer for Cloudflare Pages SPA routing than the old GitHub Pages-style relative base.

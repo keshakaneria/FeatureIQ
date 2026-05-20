@@ -1,0 +1,6 @@
+name = "featureiq-api"
+main = "src/app.js"
+compatibility_date = "2026-05-21"
+
+[observability]
+enabled = true

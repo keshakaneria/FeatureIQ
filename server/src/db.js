@@ -1,16 +1,17 @@
-import pg from "pg";
+import { neon, neonConfig } from "@neondatabase/serverless";
 
-const { Pool } = pg;
+neonConfig.fetchConnectionCache = true;
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-  max: 10,
-  idleTimeoutMillis: 30000
-});
+export function getDatabaseUrl(env = {}) {
+  return env.DATABASE_URL || process.env.DATABASE_URL;
+}
 
-pool.on("error", (err) => {
-  console.error("Unexpected pool error:", err);
-});
+export function getSql(env = {}) {
+  const databaseUrl = getDatabaseUrl(env);
 
-export default pool;
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL is not configured");
+  }
+
+  return neon(databaseUrl);
+}
